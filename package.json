@@ -18,6 +18,7 @@
     "appId": "com.yourcompany.flowiq",
     "productName": "FlowIQ",
     "icon": "icon.ico",
+    "publish": null,
     "directories": {
       "output": "dist"
     },
