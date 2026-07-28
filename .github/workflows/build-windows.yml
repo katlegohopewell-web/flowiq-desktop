@@ -1,0 +1,44 @@
+name: Build Windows Installer
+
+# Builds a real Windows .exe installer using a genuine Windows runner in the cloud.
+# This sidesteps the need for `wine` or any local Windows machine.
+#
+# How to use:
+#   1. Push this project to a GitHub repository.
+#   2. This workflow runs automatically on every push to `main`, and also
+#      whenever you go to the "Actions" tab and click "Run workflow".
+#   3. When it finishes, open the workflow run and download the "windows-installer"
+#      artifact — that's your installer .exe, ready to send to customers.
+#
+# To add code signing later (removes the Windows SmartScreen warning), add your
+# certificate as encrypted GitHub Secrets and reference them in the electron-builder
+# config — see https://www.electron.build/code-signing for the exact steps.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows installer
+        run: npm run build:win
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/*.exe
