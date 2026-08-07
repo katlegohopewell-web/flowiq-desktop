@@ -1,6 +1,6 @@
 {
   "name": "flowiq",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "FlowIQ — Stormwater Runoff Calculator (SANRAL Drainage Manual methods)",
   "main": "main.js",
   "author": "Your Company Name",
