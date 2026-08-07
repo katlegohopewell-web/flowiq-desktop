@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script>
+  // Applied before the stylesheet paints, so switching themes (or returning with a
+  // saved preference) never flashes the wrong colors first.
+  (function(){
+    try{
+      var saved = localStorage.getItem('flowiq-theme');
+      if(saved === 'dark') document.documentElement.setAttribute('data-theme','dark');
+    }catch(e){}
+  })();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FlowIQ — Stormwater Runoff Calculator</title>
@@ -14,32 +24,50 @@
     font-family:'IBM Plex Sans',sans-serif;
   }
   #consent-overlay .consent-box{
-    max-width:620px; background:#14355C; border:1px solid #2F5680; border-radius:12px;
-    padding:28px 32px; color:#DCEAF5; box-shadow:0 20px 60px rgba(0,0,0,0.5);
+    max-width:620px; background:var(--consent-bg); border:1px solid var(--consent-border); border-radius:12px;
+    padding:28px 32px; color:var(--consent-text); box-shadow:0 20px 60px var(--consent-shadow);
   }
-  #consent-overlay h2{ font-family:'Space Grotesk',sans-serif; margin:0 0 14px; font-size:20px; color:#fff; }
-  #consent-overlay p{ font-size:13.5px; line-height:1.6; color:#B9CEE0; margin:0 0 12px; }
+  #consent-overlay h2{ font-family:'Space Grotesk',sans-serif; margin:0 0 14px; font-size:20px; color:var(--consent-text); }
+  #consent-overlay p{ font-size:13.5px; line-height:1.6; color:var(--consent-muted); margin:0 0 12px; }
   #consent-overlay .consent-accept-btn{
-    margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:#0C2440;
-    background:#6FC3E8; border:none; border-radius:8px; padding:11px 20px; cursor:pointer; font-weight:600;
+    margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--print-btn-text);
+    background:var(--cyan-fill); border:none; border-radius:8px; padding:11px 20px; cursor:pointer; font-weight:600;
   }
-  #consent-overlay .consent-accept-btn:hover{ background:#8fd2ee; }
+  #consent-overlay .consent-accept-btn:hover{ background:var(--consent-btn-hover); }
   :root{
+    --bg:#FFFFFF; --panel:#F6F9FC; --panel-2:#EAF1F7; --field:#FFFFFF;
+    --line:#C9D6E3; --cyan:#0B6A8C; --cyan-fill:#4FB8E0; --cyan-dim:#4C7F97;
+    --paper:#F7F5EF; --amber:#9C6A1E; --text:#14263B; --muted:#56728A; --good:#1F7A52; --bad:#C0392B;
+    --eq-bg:#EAF6FC; --eq-border:#BFE3F2;
+    --flag-bg:#FDF2E2; --flag-border:#E8C88B; --flag-hover:#F7E2BE;
+    --tab-hover:rgba(11,106,140,0.06); --thead-bg:rgba(11,106,140,0.05); --trow-hover:rgba(11,106,140,0.04);
+    --grid-line:rgba(11,106,140,0.035); --print-btn-text:#08243F;
+    --consent-bg:#FFFFFF; --consent-border:#C9D6E3; --consent-text:#14263B; --consent-muted:#56728A;
+    --consent-shadow:rgba(20,38,59,0.18); --consent-btn-hover:#6FCCEA;
+  }
+  [data-theme="dark"]{
     --bg:#0F2A4A; --panel:#14355C; --panel-2:#0F2A4A; --field:#0C2440;
-    --line:#2F5680; --cyan:#6FC3E8; --cyan-dim:#4E8FAF;
-    --paper:#F7F5EF; --amber:#E3A857; --text:#DCEAF5; --muted:#7FA0BE; --good:#7FD4A6;
+    --line:#2F5680; --cyan:#6FC3E8; --cyan-fill:#6FC3E8; --cyan-dim:#4E8FAF;
+    --paper:#F7F5EF; --amber:#E3A857; --text:#DCEAF5; --muted:#7FA0BE; --good:#7FD4A6; --bad:#E38A8A;
+    --eq-bg:rgba(111,195,232,0.08); --eq-border:rgba(111,195,232,0.25);
+    --flag-bg:rgba(227,168,87,0.08); --flag-border:rgba(227,168,87,0.4); --flag-hover:rgba(227,168,87,0.2);
+    --tab-hover:rgba(111,195,232,0.08); --thead-bg:rgba(111,195,232,0.06); --trow-hover:rgba(111,195,232,0.05);
+    --grid-line:rgba(111,195,232,0.05); --print-btn-text:#0F2A4A;
+    --consent-bg:#14355C; --consent-border:#2F5680; --consent-text:#DCEAF5; --consent-muted:#B9CEE0;
+    --consent-shadow:rgba(0,0,0,0.5); --consent-btn-hover:#8fd2ee;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:
       linear-gradient(var(--bg), var(--bg)),
-      repeating-linear-gradient(0deg, rgba(111,195,232,0.05) 0px, rgba(111,195,232,0.05) 1px, transparent 1px, transparent 32px),
-      repeating-linear-gradient(90deg, rgba(111,195,232,0.05) 0px, rgba(111,195,232,0.05) 1px, transparent 1px, transparent 32px);
+      repeating-linear-gradient(0deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 32px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0px, var(--grid-line) 1px, transparent 1px, transparent 32px);
+    transition:background-color .15s;
     color:var(--text); font-family:'IBM Plex Sans', sans-serif; min-height:100vh;
   }
   .wrap{max-width:1180px;margin:0 auto;padding:26px 18px 90px;}
-  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px;}
+  header{border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px;position:relative;}
   .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:8px;margin-bottom:6px;}
   .eyebrow::before{content:"";width:16px;height:1px;background:var(--cyan);display:inline-block;}
   h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(22px,3.6vw,30px);margin:0 0 6px;letter-spacing:-0.01em;}
@@ -52,9 +80,9 @@
   .tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.03em;color:var(--muted);background:transparent;border:none;border-right:1px solid var(--line);}
   .tab:last-child{border-right:none;}
   .tab .n{color:var(--cyan-dim);margin-right:6px;}
-  .tab.active{background:var(--cyan);color:#08243F;font-weight:600;}
+  .tab.active{background:var(--cyan-fill);color:#08243F;font-weight:600;}
   .tab.active .n{color:#08243F;}
-  .tab:hover:not(.active){background:rgba(111,195,232,0.08);color:var(--text);}
+  .tab:hover:not(.active){background:var(--tab-hover);color:var(--text);}
   .tab:disabled{opacity:.45;cursor:default;}
 
   .step{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:16px;}
@@ -63,7 +91,7 @@
   .step-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;}
   .step-note{color:var(--muted);font-size:12.5px;line-height:1.55;margin:6px 0 16px;max-width:820px;}
   .step-note b{color:var(--text);}
-  .eq{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--cyan);background:rgba(111,195,232,0.08);border:1px solid rgba(111,195,232,0.25);display:inline-block;padding:4px 10px;border-radius:6px;margin:4px 0 14px;}
+  .eq{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--cyan);background:var(--eq-bg);border:1px solid var(--eq-border);display:inline-block;padding:4px 10px;border-radius:6px;margin:4px 0 14px;}
 
   .grid{display:grid;gap:14px;}
   .grid-2{grid-template-columns:1fr 1fr;}
@@ -79,21 +107,21 @@
   }
   .field input:focus, .field select:focus{border-color:var(--cyan);}
   .hint{font-size:11px;color:var(--cyan-dim);margin-top:5px;line-height:1.4;}
-  .flag{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--amber);border:1px solid rgba(227,168,87,0.4);background:rgba(227,168,87,0.08);padding:1px 7px;border-radius:20px;font-family:'IBM Plex Mono',monospace;}
+  .flag{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--amber);border:1px solid var(--flag-border);background:var(--flag-bg);padding:1px 7px;border-radius:20px;font-family:'IBM Plex Mono',monospace;}
 
   .toggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:16px;width:fit-content;}
   .toggle button{padding:8px 16px;background:var(--field);border:none;color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:12.5px;cursor:pointer;border-right:1px solid var(--line);}
   .toggle button:last-child{border-right:none;}
-  .toggle button.active{background:var(--cyan);color:#08243F;font-weight:600;}
+  .toggle button.active{background:var(--cyan-fill);color:#08243F;font-weight:600;}
 
   .outbox{background:var(--field);border:1px dashed var(--line);border-radius:8px;padding:12px 14px;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--good);margin-top:6px;}
   .outbox .lbl{color:var(--muted);font-size:11px;display:block;margin-bottom:3px;}
 
   table.dtab{width:100%;border-collapse:collapse;font-size:12px;font-family:'IBM Plex Mono',monospace;margin-top:10px;}
   table.dtab th, table.dtab td{border:1px solid var(--line);padding:6px 8px;text-align:center;}
-  table.dtab th{color:var(--cyan);font-weight:600;background:rgba(111,195,232,0.06);}
+  table.dtab th{color:var(--cyan);font-weight:600;background:var(--thead-bg);}
   table.dtab td{color:var(--text);}
-  table.dtab tr:hover td{background:rgba(111,195,232,0.05);}
+  table.dtab tr:hover td{background:var(--trow-hover);}
   table.dtab td.rowlabel, table.dtab th.rowlabel{text-align:left;color:var(--muted);font-family:'IBM Plex Sans',sans-serif;}
 
   .station-row{display:grid;grid-template-columns:22px 1.6fr 0.7fr 0.7fr 0.7fr;gap:8px;align-items:center;padding:7px 4px;border-bottom:1px solid var(--line);font-size:12.5px;}
@@ -107,7 +135,7 @@
   .pct-row input{width:100%;background:var(--field);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;}
   .pct-row .cval{color:var(--cyan-dim);font-family:'IBM Plex Mono',monospace;text-align:right;}
   .pct-total{font-size:11.5px;color:var(--muted);margin-top:4px;font-family:'IBM Plex Mono',monospace;}
-  .pct-total.bad{color:#E38A8A;}
+  .pct-total.bad{color:var(--bad);}
   .pct-total.ok{color:var(--good);}
 
   .result-hero{background:var(--paper);color:#12233A;border-radius:14px;padding:26px;margin-top:6px;}
@@ -126,11 +154,11 @@
 
   .fig-link{
     display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--amber);
-    border:1px solid rgba(227,168,87,0.4);background:rgba(227,168,87,0.08);
+    border:1px solid var(--flag-border);background:var(--flag-bg);
     padding:1px 8px 1px 6px;border-radius:20px;font-family:'IBM Plex Mono',monospace;
     cursor:pointer;transition:background .15s;
   }
-  .fig-link:hover{background:rgba(227,168,87,0.2);}
+  .fig-link:hover{background:var(--flag-hover);}
   .fig-link svg{width:10px;height:10px;flex:none;}
 
   .fig-modal-overlay{
@@ -157,11 +185,22 @@
   .print-only{display:none;}
   .print-btn{
     display:inline-flex;align-items:center;gap:6px;font-family:'IBM Plex Mono',monospace;
-    font-size:12px;color:var(--bg);background:var(--cyan);border:none;border-radius:8px;
+    font-size:12px;color:var(--print-btn-text);background:var(--cyan-fill);border:none;border-radius:8px;
     padding:8px 16px;cursor:pointer;margin:14px 0;
   }
   .print-btn:hover{background:#8FD4F2;}
   .print-btn svg{width:14px;height:14px;}
+
+  #theme-toggle{
+    position:absolute; top:2px; right:0;
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted);
+    background:var(--field); border:1px solid var(--line); border-radius:20px;
+    padding:6px 13px; cursor:pointer; transition:border-color .15s, color .15s;
+  }
+  #theme-toggle:hover{ border-color:var(--cyan); color:var(--text); }
+  #theme-toggle .icon{ font-size:13px; line-height:1; }
+  @media (max-width:640px){ #theme-toggle{ position:static; margin-bottom:12px; } #section-switch{ position:static !important; margin-bottom:12px; margin-right:8px; } }
 
   @media print{
     #consent-overlay{ display:none !important; }
@@ -201,14 +240,18 @@
 </div>
 <div class="wrap">
   <header class="no-print">
+    <button id="theme-toggle" type="button" onclick="toggleTheme()">
+      <span class="icon" id="theme-toggle-icon">☾</span><span id="theme-toggle-label">Dark mode</span>
+    </button>
+    <button id="section-switch" type="button" onclick="switchSection()" style="display:none;position:absolute;top:2px;right:150px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);background:var(--field);border:1px solid var(--line);border-radius:20px;padding:6px 13px;cursor:pointer;">← Change section</button>
     <div class="brand-row">
       <img src="data:image/png;base64,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" alt="FlowIQ" class="brand-logo">
       <div>
-        <div class="eyebrow">Hydrology / Peak Flow Estimation</div>
-        <h1>FlowIQ <span class="h1-sub">— Stormwater Runoff Calculator</span></h1>
+        <div class="eyebrow" id="app_eyebrow">Hydrology / Peak Flow Estimation</div>
+        <h1>FlowIQ <span class="h1-sub" id="app_h1sub">— Stormwater Runoff Calculator</span></h1>
       </div>
     </div>
-    <p class="sub">Rational Method implementation following the SANRAL Drainage Manual, Section 3.1.1 (6th ed., worked example verified) — including the 10%–85% slope method, catchment-characteristic runoff coefficients (Tables 3.3–3.5), and coordinate-based design rainfall lookup from the SA Weather Bureau TR102 station archive.</p>
+    <p class="sub" id="app_sub">Rational Method implementation following the SANRAL Drainage Manual, Section 3.1.1 (6th ed., worked example verified) — including the 10%–85% slope method, catchment-characteristic runoff coefficients (Tables 3.3–3.5), and coordinate-based design rainfall lookup from the SA Weather Bureau TR102 station archive.</p>
   </header>
 
   <div id="print_header" class="print-only"></div>
@@ -347,7 +390,8 @@ function hideFigureModal(){
 function updatePrintHeader(){
   const el = document.getElementById('print_header');
   if(!el) return;
-  const methodName = tabDefs[S.tab] ? tabDefs[S.tab].label : '';
+  const defs = currentTabDefs();
+  const methodName = defs[S.tab] ? defs[S.tab].label : '';
   el.innerHTML = `<div class="print-header-box">
     <h2>${SP.projectName || 'Untitled project'} — ${methodName}</h2>
     <div class="grid2">
@@ -420,6 +464,8 @@ function saveProjectToFile(){
     S2: {...S2},
     S3: {...S3},
     S4: {...S4},
+    S5: {...S5, ptT_touched: [...S5.ptT_touched]},
+    WS: {...WS},
   };
   const json = JSON.stringify(payload, jsonReplacerNaN, 2);
   const blob = new Blob([json], {type:'application/json'});
@@ -453,6 +499,16 @@ function loadProjectFromFile(file){
       applyLoadedState(S2, data.S2);
       applyLoadedState(S3, data.S3);
       applyLoadedState(S4, data.S4);
+      if(data.S5){
+        applyLoadedState(S5, data.S5);
+        S5.ptT_touched = new Set(data.S5.ptT_touched || []);
+        if(S5.dre===undefined) S5.dre = null;
+      }
+      if(data.WS){
+        applyLoadedState(WS, data.WS);
+        if(!Array.isArray(WS.entries)) WS.entries = [];
+        WS.entries.forEach(e=>{ if(e.name===undefined) e.name=''; });
+      }
       S.tab = 0;
       render();
     }catch(err){
@@ -547,6 +603,7 @@ const SP = {
 
 const S = {
   tab: 0,
+  section: null, // null = show the section-picker home screen; 'stormwater' | 'watersewer' once chosen
   A: NaN,
   tcMethod: 'channel', // 'overland' | 'channel'
   tcL: NaN, // shared: longest watercourse / flow path length (km)
@@ -606,6 +663,34 @@ const S1 = {
   selectedPreset: 'custom',
   rural: { cs: [0,0,0,0], cp:[0,0,0,0], cv:[0,0,0,0] }, // blank until entered — no pre-filled split to clear first
   urban: [0,0,0,0, 0,0, 0,0, 0,0,0,0], // blank until entered
+  urbanFactor: URBAN_TABLE.map(u=>u[2]),
+};
+
+// ---- Rational Method (Alternative 3) state — shares area/T_C/characteristics with S/S1
+// via the same syncX() functions below; only point rainfall (ptT) is independent, since
+// that's the one thing Alternative 3 actually does differently (manual entry from the
+// external Design Rainfall Estimation software, no auto-fill stand-in, no ARF). ----
+const S5 = {
+  A: NaN,
+  tcMethod: 'channel',
+  tcL: NaN,
+  elevLow: NaN, elevHigh: NaN,
+  ov: { r: 0.10 },
+  chProfileOverride: false,
+  chH10manual: null,
+  chH85manual: null,
+  coord: { lat: NaN, lon: NaN }, // reference only — for the DRE-SA import file's own header, not looked up by FlowIQ
+  T_design: 20,
+  ptT: {2:null,5:null,10:null,20:null,50:null,100:null,200:null}, // auto-filled by DRE-SA import once loaded, else manual
+  ptT_touched: new Set(), // return periods the user has manually overridden after import
+  dre: null, // parsed DRE-SA export: {durations:[hours...], values:{T:[mm...]}, filename}
+  alpha: 80, beta: 20,
+  mapBandOverride: 1,
+  dolomitePct: 0,
+  ftCurve: 'steep',
+  selectedPreset: 'custom',
+  rural: { cs: [0,0,0,0], cp:[0,0,0,0], cv:[0,0,0,0] },
+  urban: [0,0,0,0, 0,0, 0,0, 0,0,0,0],
   urbanFactor: URBAN_TABLE.map(u=>u[2]),
 };
 
@@ -691,21 +776,21 @@ const S4 = {
 // their catchment once. Method-specific fields (rainfall alternative, basin
 // choice, ARF overrides, etc.) stay independent per tab.
 
-function syncA(value){ S.A=S1.A=S2.A=S3.A=S4.A=value; }
-function syncTcL(value){ S.tcL=S1.tcL=S2.tcL=S3.tcL=S4.tcL=value; }
-function syncElevLow(value){ S.elevLow=S1.elevLow=S2.elevLow=S3.elevLow=S4.elevLow=value; }
-function syncElevHigh(value){ S.elevHigh=S1.elevHigh=S2.elevHigh=S3.elevHigh=S4.elevHigh=value; }
+function syncA(value){ S.A=S1.A=S2.A=S3.A=S4.A=S5.A=value; }
+function syncTcL(value){ S.tcL=S1.tcL=S2.tcL=S3.tcL=S4.tcL=S5.tcL=value; }
+function syncElevLow(value){ S.elevLow=S1.elevLow=S2.elevLow=S3.elevLow=S4.elevLow=S5.elevLow=value; }
+function syncElevHigh(value){ S.elevHigh=S1.elevHigh=S2.elevHigh=S3.elevHigh=S4.elevHigh=S5.elevHigh=value; }
 function syncChOverride(checked){
-  S.chProfileOverride=S1.chProfileOverride=S2.chProfileOverride=S3.chProfileOverride=S4.chProfileOverride=checked;
-  if(!checked){ S.chH10manual=S1.chH10manual=S2.chH10manual=S3.chH10manual=S4.chH10manual=null;
-                S.chH85manual=S1.chH85manual=S2.chH85manual=S3.chH85manual=S4.chH85manual=null; }
+  S.chProfileOverride=S1.chProfileOverride=S2.chProfileOverride=S3.chProfileOverride=S4.chProfileOverride=S5.chProfileOverride=checked;
+  if(!checked){ S.chH10manual=S1.chH10manual=S2.chH10manual=S3.chH10manual=S4.chH10manual=S5.chH10manual=null;
+                S.chH85manual=S1.chH85manual=S2.chH85manual=S3.chH85manual=S4.chH85manual=S5.chH85manual=null; }
 }
-function syncChH10(value){ S.chH10manual=S1.chH10manual=S2.chH10manual=S3.chH10manual=S4.chH10manual=value; }
-function syncChH85(value){ S.chH85manual=S1.chH85manual=S2.chH85manual=S3.chH85manual=S4.chH85manual=value; }
-function syncTcMethod(value){ S.tcMethod=S1.tcMethod=value; } // only M1/M2 offer overland; SDF/UH/Emp are always channel
-function syncOvR(value){ S.ov.r=S1.ov.r=value; }
-function syncCoordLat(value){ S.coord.lat=S1.coord.lat=S2.coord.lat=S3.coord.lat=S4.coord.lat=value; }
-function syncCoordLon(value){ S.coord.lon=S1.coord.lon=S2.coord.lon=S3.coord.lon=S4.coord.lon=value; }
+function syncChH10(value){ S.chH10manual=S1.chH10manual=S2.chH10manual=S3.chH10manual=S4.chH10manual=S5.chH10manual=value; }
+function syncChH85(value){ S.chH85manual=S1.chH85manual=S2.chH85manual=S3.chH85manual=S4.chH85manual=S5.chH85manual=value; }
+function syncTcMethod(value){ S.tcMethod=S1.tcMethod=S5.tcMethod=value; } // only the Rational Method tabs offer overland; SDF/UH/Emp are always channel
+function syncOvR(value){ S.ov.r=S1.ov.r=S5.ov.r=value; }
+function syncCoordLat(value){ S.coord.lat=S1.coord.lat=S2.coord.lat=S3.coord.lat=S4.coord.lat=S5.coord.lat=value; }
+function syncCoordLon(value){ S.coord.lon=S1.coord.lon=S2.coord.lon=S3.coord.lon=S4.coord.lon=S5.coord.lon=value; }
 function syncRThunder(value){ S.R_thunder=S1.R_thunder=S3.R_thunder=value; }
 function syncVeldZone(value, fromEmp){
   if(fromEmp){
@@ -722,60 +807,112 @@ function syncVeldZone(value, fromEmp){
   }
 }
 function syncLc(value){ S3.Lc=S4.Lc=value; }
-function syncTDesign(value){ S.T_design=S1.T_design=S2.T_design=S3.T_design=S4.T_design=value; }
-// Catchment-characteristics fields (Table 3.3-3.5) are only used by M1 and M2
-function syncDolomite(value){ S.dolomitePct=S1.dolomitePct=value; }
-function syncAlpha(value){ S.alpha=S1.alpha=value; S.beta=S1.beta=100-value; }
-function syncBeta(value){ S.beta=S1.beta=value; S.alpha=S1.alpha=100-value; }
-function syncFtCurve(value){ S.ftCurve=S1.ftCurve=value; }
-function syncMapBand(value){ S.mapBandOverride=S1.mapBandOverride=value; }
-function syncRuralComp(comp,i,value){ S.rural[comp][i]=value; S1.rural[comp][i]=value; }
-function syncUrbanPct(i,value){ S.urban[i]=value; S1.urban[i]=value; }
-function syncUrbanFactor(i,value){ S.urbanFactor[i]=value; S1.urbanFactor[i]=value; }
+function syncTDesign(value){ S.T_design=S1.T_design=S2.T_design=S3.T_design=S4.T_design=S5.T_design=value; }
+// Catchment-characteristics fields (Table 3.3-3.5) are shared by all three Rational Method tabs
+function syncDolomite(value){ S.dolomitePct=S1.dolomitePct=S5.dolomitePct=value; }
+function syncAlpha(value){ S.alpha=S1.alpha=S5.alpha=value; S.beta=S1.beta=S5.beta=100-value; }
+function syncBeta(value){ S.beta=S1.beta=S5.beta=value; S.alpha=S1.alpha=S5.alpha=100-value; }
+function syncFtCurve(value){ S.ftCurve=S1.ftCurve=S5.ftCurve=value; }
+function syncMapBand(value){ S.mapBandOverride=S1.mapBandOverride=S5.mapBandOverride=value; }
+function syncRuralComp(comp,i,value){ S.rural[comp][i]=value; S1.rural[comp][i]=value; S5.rural[comp][i]=value; }
+function syncUrbanPct(i,value){ S.urban[i]=value; S1.urban[i]=value; S5.urban[i]=value; }
+function syncUrbanFactor(i,value){ S.urbanFactor[i]=value; S1.urbanFactor[i]=value; S5.urbanFactor[i]=value; }
 function syncPresetApply(id){
-  S.selectedPreset=S1.selectedPreset=id;
-  applyPreset(id, S); applyPreset(id, S1);
+  S.selectedPreset=S1.selectedPreset=S5.selectedPreset=id;
+  applyPreset(id, S); applyPreset(id, S1); applyPreset(id, S5);
 }
 
-const tabDefs = [
-  {n:'00', label:'Project Details', enabled:true},
-  {n:'01', label:'Rational Method 1', enabled:true},
-  {n:'02', label:'Rational Method 2', enabled:true},
-  {n:'03', label:'Standard Design Flood', enabled:true},
-  {n:'04', label:'Unit Hydrograph', enabled:true},
-  {n:'05', label:'Empirical (MIPI-71)', enabled:true},
-  {n:'06', label:'Summary', enabled:true},
+const STORMWATER_TABDEFS = [
+  {n:'00', label:'Project Details', enabled:true, render:renderProject,
+    footer:`<b>Project details</b> appear on every printed/PDF export as a letterhead, and are shared across all methods — fill this in once.`},
+  {n:'01', label:'Rational Method 1', enabled:true, render:renderRational1,
+    footer:`<b>What's data-driven vs. manual here.</b> Rational Method 1 implements SANRAL's Alternative 1 — the HRU 2/78 Depth-Duration-Frequency co-axial diagram (Figure 3.7). That diagram is a genuine multi-axis nomograph (MAR × region × T<sub>C</sub> simultaneously), so point rainfall stays a manual entry, same reasoning as the flood run-off factor on the Unit Hydrograph tab. Everything else — T<sub>C</sub>, the Table 3.3–3.5 runoff-coefficient build-up, and ARF (eq. 3.7) — is fully computed, reusing the exact same verified engines as Rational Method 2. Area/T<sub>C</sub>/catchment-characteristics inputs are independent per tab, matching how reference software (e.g. Sinotech's Utility Programs for Drainage) presents Alternative 1 and 2 as separate reports.`},
+  {n:'02', label:'Rational Method 2', enabled:true, render:renderRational,
+    footer:`<b>What's data-driven vs. manual here.</b> Time of concentration, the Table 3.3–3.5 runoff-coefficient build-up, design rainfall depth (P<sub>t,T</sub>), and the area-reduction factor (ARF, eq. 3.7) are all fully computed and validated against the manual's Moretele Spruit worked example — matched to within 0.01mm on point rainfall, within 0.3% on ARF, and 3 decimal places elsewhere. (An earlier version of this app had ARF wrong due to a one-digit transcription error reading the manual's scanned PDF — 90000 misread as 9000 — since corrected against a clean-text source and re-verified against two independent worked examples.) Rainfall automatically switches method by T<sub>C</sub>: modified Hershfield equation below 6h, a linear blend of Hershfield and TR102 between 6–24h, and TR102 day-interpolation above 24h. Any P<sub>t,T</sub> or ARF cell can still be overridden by hand if you have a better source. One figure remains a manual entry: R, days of thunder heard/year (Figure 3.9), a contour map we can't reliably digitise from the PDF text.`},
+  {n:'03', label:'Rational Method (Alt. 3)', enabled:true, render:renderRationalAlt3,
+    footer:`<b>What's data-driven vs. manual here.</b> This is SANRAL's Alternative 3 — design rainfall from the separate Design Rainfall Estimation software (an external tool, not a printed table or formula). Point rainfall (P<sub>t,T</sub>) can now be auto-filled by importing that software's plain-text export once per project — FlowIQ parses its gridded-values table and interpolates log-linearly across duration for whatever T<sub>C</sub> results, for every return period — or entered by hand if no export file is available. Everything downstream — T<sub>C</sub> and the Table 3.3–3.5 runoff-coefficient build-up — reuses the exact same verified engines as the other two Rational Method tabs. One deliberate difference: <b>no area reduction factor is applied here</b> — the manual's own worked example (Moretele Spruit) confirms this; point intensity is used directly as the catchment-average intensity, unlike Alternatives 1 and 2 which both apply ARF (eq. 3.7).`},
+  {n:'04', label:'Standard Design Flood', enabled:true, render:renderSDF,
+    footer:`<b>What's data-driven vs. manual here.</b> Time of concentration, design point rainfall, and ARF (eq. 3.19) reuse the same verified engines as the Rational Method 2 tab — ARF now matches the manual's worked example to within 0.3% (see note on that tab about the earlier transcription error, now fixed). The basin's M, R, C₂ and C₁₀₀ come from the manual's Table 3B.1 (all 29 basins digitised), and C<sub>T</sub> uses Table 3.12's growth factors, verified against the manual's Moretele Spruit SDF worked example (C₂₀=0.3112, C₅₀=0.3639 reproduced exactly). Basin selection is auto-suggested from the nearest of the 29 representative stations to your coordinates — an approximation of Figure 3.21's actual drainage-basin boundaries, not a true polygon lookup, so confirm against the map for anything final.`},
+  {n:'05', label:'Unit Hydrograph', enabled:true, render:renderUH,
+    footer:`<b>What's data-driven vs. manual here.</b> The S-curve conversion (Steps 9–10, using the manual's full Table 3.8 dimensionless unit hydrograph and eq. 3.14/3.15) is fully computed — validated against the manual's own worked example to within ~1–2%. Point rainfall reuses the same Hershfield engine as the other tabs, and ARF (eq. 3.7) is now computed per storm duration, same verified formula as the other tabs. Lag time T<sub>L</sub> is also now computed — T<sub>L</sub>=C<sub>t</sub>·I<sub>c</sub><sup>0.36</sup>, using regional coefficients from the DWS's 2025 Flood Frequency guide (the closed-form equation behind the manual's Figure 3.16 chart) — verified to within 0.3% against the manual's own worked value. Two figures remain manual entries: the veld-type zone (Figure 3.15, a map you pick from) and the flood run-off factor (Figure 3.17 — a genuine multi-variable co-axial nomograph, not reducible to a formula or simple table at all).`},
+  {n:'06', label:'Empirical (MIPI-71)', enabled:true, render:renderEmpirical,
+    footer:`<b>What's data-driven vs. manual here.</b> Everything. This method (SANRAL's own Section 3.1.5/3.2.3, identical to the DWS 2025 guide's "MIPI-71") is a single closed-form equation — no graphs, no charts, nothing ungraphable. Validated against <b>two independent worked examples</b> in the manual — a 28.5km² catchment (Q₂₀=78.85, Q₅₀=109.28 m³/s) and a 4318km² catchment (Q₁₀/₂₀/₅₀/₁₀₀=1812/2270/2969/3493 m³/s) — all six values reproduced to within 0.04%. The K<sub>T</sub> coefficient table combines both documents: SANRAL's own printed values where given (T=10–100), with the DWS 2025 guide filling in T=2, 5, and 200 — except zones 4 and 5A, where DWS's table oversimplifies by grouping them with zone 9; SANRAL's distinct printed value (0.59 vs 0.50 at T=10) is used instead. Veld zone remains a manual pick from Figure 3.15 (a map), same as the Unit Hydrograph tab.`},
+  {n:'07', label:'Summary', enabled:true, render:renderSummary,
+    footer:`<b>Summary</b> recomputes every method fresh from its own tab's current inputs — so if a method shows "—", visit that tab and fill in its required manual entries (e.g. Rational Method 1's point rainfall, or Unit Hydrograph's veld zone) first.`},
 ];
+
+const WATERSEWER_TABDEFS = [
+  {n:'00', label:'Project Details', enabled:true, render:renderProject,
+    footer:`<b>Project details</b> appear on every printed/PDF export as a letterhead, and are shared across both sections — fill this in once.`},
+  {n:'01', label:'Water & Sewer Demand', enabled:true, render:renderWaterSewer,
+    footer:`<b>What's data-driven vs. manual here.</b> This section is from a different reference entirely — the CSIR Red Book (Neighbourhood Planning and Design Guide), Sections J (Water Supply) and K (Sanitation), not the SANRAL Drainage Manual used in the Stormwater section. Land-use unit demands (Table J.2/K.4) and the 11 sewer unit hydrographs (Table K.5, 24-hour shapes) are fully digitised and validated against the manual's own worked examples (50 medium-density residential + 30 business/commercial units) to the exact numbers given. One honest simplification worth knowing: the manual names "Unit Hydrograph" and "AADD" as two separate sewer methods, but its own worked examples show they resolve to identical arithmetic once the unit flow figure is fixed — so here they share one calculation path; only the Peak-factor method is genuinely different (no time-of-day shape, just a multiplier). The Peak-factor method's residential figure normally comes from a graph (Figure K.21) rather than a table; since a curve can't be digitised as precisely as a table, that one field defaults to a reasonable starting value and is always manually editable — check it against the graph for anything final.`},
+];
+function currentTabDefs(){ return S.section==='watersewer' ? WATERSEWER_TABDEFS : STORMWATER_TABDEFS; }
 
 function renderTabs(){
   const tabsEl = document.getElementById('tabs');
-  tabsEl.innerHTML = tabDefs.map((t,i)=>
+  const defs = currentTabDefs();
+  tabsEl.innerHTML = defs.map((t,i)=>
     `<button class="tab ${i===S.tab?'active':''}" ${t.enabled?'':'disabled'} data-i="${i}"><span class="n">${t.n}</span>${t.label}${t.enabled?'':' — next up'}</button>`
   ).join('');
-  [...tabsEl.children].forEach((btn,i)=>{ if(tabDefs[i].enabled) btn.onclick=()=>{S.tab=i; render();}; });
+  [...tabsEl.children].forEach((btn,i)=>{ if(defs[i].enabled) btn.onclick=()=>{S.tab=i; render();}; });
 }
 
-const FOOTER_TEXT = [
-  `<b>Project details</b> appear on every printed/PDF export as a letterhead, and are shared across all methods — fill this in once.`,
-  `<b>What's data-driven vs. manual here.</b> Rational Method 1 implements SANRAL's Alternative 1 — the HRU 2/78 Depth-Duration-Frequency co-axial diagram (Figure 3.7). That diagram is a genuine multi-axis nomograph (MAR × region × T<sub>C</sub> simultaneously), so point rainfall stays a manual entry, same reasoning as the flood run-off factor on the Unit Hydrograph tab. Everything else — T<sub>C</sub>, the Table 3.3–3.5 runoff-coefficient build-up, and ARF (eq. 3.7) — is fully computed, reusing the exact same verified engines as Rational Method 2. Area/T<sub>C</sub>/catchment-characteristics inputs are independent per tab, matching how reference software (e.g. Sinotech's Utility Programs for Drainage) presents Alternative 1 and 2 as separate reports.`,
-  `<b>What's data-driven vs. manual here.</b> Time of concentration, the Table 3.3–3.5 runoff-coefficient build-up, design rainfall depth (P<sub>t,T</sub>), and the area-reduction factor (ARF, eq. 3.7) are all fully computed and validated against the manual's Moretele Spruit worked example — matched to within 0.01mm on point rainfall, within 0.3% on ARF, and 3 decimal places elsewhere. (An earlier version of this app had ARF wrong due to a one-digit transcription error reading the manual's scanned PDF — 90000 misread as 9000 — since corrected against a clean-text source and re-verified against two independent worked examples.) Rainfall automatically switches method by T<sub>C</sub>: modified Hershfield equation below 6h, a linear blend of Hershfield and TR102 between 6–24h, and TR102 day-interpolation above 24h. Any P<sub>t,T</sub> or ARF cell can still be overridden by hand if you have a better source. One figure remains a manual entry: R, days of thunder heard/year (Figure 3.9), a contour map we can't reliably digitise from the PDF text.`,
-  `<b>What's data-driven vs. manual here.</b> Time of concentration, design point rainfall, and ARF (eq. 3.19) reuse the same verified engines as the Rational Method 2 tab — ARF now matches the manual's worked example to within 0.3% (see note on that tab about the earlier transcription error, now fixed). The basin's M, R, C₂ and C₁₀₀ come from the manual's Table 3B.1 (all 29 basins digitised), and C<sub>T</sub> uses Table 3.12's growth factors, verified against the manual's Moretele Spruit SDF worked example (C₂₀=0.3112, C₅₀=0.3639 reproduced exactly). Basin selection is auto-suggested from the nearest of the 29 representative stations to your coordinates — an approximation of Figure 3.21's actual drainage-basin boundaries, not a true polygon lookup, so confirm against the map for anything final.`,
-  `<b>What's data-driven vs. manual here.</b> The S-curve conversion (Steps 9–10, using the manual's full Table 3.8 dimensionless unit hydrograph and eq. 3.14/3.15) is fully computed — validated against the manual's own worked example to within ~1–2%. Point rainfall reuses the same Hershfield engine as the other tabs, and ARF (eq. 3.7) is now computed per storm duration, same verified formula as the other tabs. Lag time T<sub>L</sub> is also now computed — T<sub>L</sub>=C<sub>t</sub>·I<sub>c</sub><sup>0.36</sup>, using regional coefficients from the DWS's 2025 Flood Frequency guide (the closed-form equation behind the manual's Figure 3.16 chart) — verified to within 0.3% against the manual's own worked value. Two figures remain manual entries: the veld-type zone (Figure 3.15, a map you pick from) and the flood run-off factor (Figure 3.17 — a genuine multi-variable co-axial nomograph, not reducible to a formula or simple table at all).`,
-  `<b>What's data-driven vs. manual here.</b> Everything. This method (SANRAL's own Section 3.1.5/3.2.3, identical to the DWS 2025 guide's "MIPI-71") is a single closed-form equation — no graphs, no charts, nothing ungraphable. Validated against <b>two independent worked examples</b> in the manual — a 28.5km² catchment (Q₂₀=78.85, Q₅₀=109.28 m³/s) and a 4318km² catchment (Q₁₀/₂₀/₅₀/₁₀₀=1812/2270/2969/3493 m³/s) — all six values reproduced to within 0.04%. The K<sub>T</sub> coefficient table combines both documents: SANRAL's own printed values where given (T=10–100), with the DWS 2025 guide filling in T=2, 5, and 200 — except zones 4 and 5A, where DWS's table oversimplifies by grouping them with zone 9; SANRAL's distinct printed value (0.59 vs 0.50 at T=10) is used instead. Veld zone remains a manual pick from Figure 3.15 (a map), same as the Unit Hydrograph tab.`,
-  `<b>Summary</b> recomputes every method fresh from its own tab's current inputs — so if a method shows "—", visit that tab and fill in its required manual entries (e.g. Rational Method 1's point rainfall, or Unit Hydrograph's veld zone) first.`,
-];
+// ---- Home screen: choose between the two independent sections before any tabs appear ----
+function renderHome(){
+  document.getElementById('tabs').innerHTML = '';
+  document.getElementById('footer').innerHTML = '';
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    <div class="step" style="text-align:center;padding:36px 24px;">
+      <div class="step-head" style="justify-content:center;"><span class="step-title" style="font-size:18px;">Choose a section</span></div>
+      <p class="step-note" style="max-width:560px;margin-left:auto;margin-right:auto;">Each section is an independent set of calculations with its own reference document — pick the one you need. You can switch sections at any time from the link in the header.</p>
+    </div>
+    <div class="grid grid-2" style="gap:20px;max-width:820px;margin:0 auto;">
+      <button id="home_stormwater" type="button" class="charblock" style="font-family:inherit;width:100%;text-align:left;cursor:pointer;border:1px solid var(--line);background:var(--panel);padding:24px;border-radius:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--line)'">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text);margin-bottom:8px;">Stormwater Peak Flow</div>
+        <p class="hint" style="margin:0;">Rational Methods 1–3, Standard Design Flood, Unit Hydrograph, and Empirical (MIPI-71) — SANRAL Drainage Manual.</p>
+      </button>
+      <button id="home_watersewer" type="button" class="charblock" style="font-family:inherit;width:100%;text-align:left;cursor:pointer;border:1px solid var(--line);background:var(--panel);padding:24px;border-radius:12px;transition:border-color .15s;" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--line)'">
+        <div style="font-family:'Space Grotesk',sans-serif;font-size:17px;color:var(--text);margin-bottom:8px;">Water &amp; Sewer Demand</div>
+        <p class="hint" style="margin:0;">Average annual daily demand, peak water demand, and sewer flow — CSIR Red Book, Sections J &amp; K.</p>
+      </button>
+    </div>
+  `;
+  document.getElementById('home_stormwater').addEventListener('click', ()=>{ S.section='stormwater'; S.tab=0; render(); });
+  document.getElementById('home_watersewer').addEventListener('click', ()=>{ S.section='watersewer'; S.tab=0; render(); });
+}
+
+function updateAppHeader(){
+  const eyebrow = document.getElementById('app_eyebrow');
+  const h1sub = document.getElementById('app_h1sub');
+  const sub = document.getElementById('app_sub');
+  if(!eyebrow || !h1sub || !sub) return;
+  if(S.section==='watersewer'){
+    eyebrow.textContent = 'Water Services / Demand & Sewer Flow';
+    h1sub.textContent = '— Water & Sewer Demand Calculator';
+    sub.textContent = 'Average annual daily demand, peak water demand (Table J.9), and sewer flow (Unit Hydrograph, AADD, or Peak Factor methods) — CSIR Red Book, Sections J & K — with a per-land-use summary of demand and instantaneous flow, drawing on the SANRAL Design Rainfall Estimation software where relevant.';
+  } else if(S.section==='stormwater'){
+    eyebrow.textContent = 'Hydrology / Peak Flow Estimation';
+    h1sub.textContent = '— Stormwater Runoff Calculator';
+    sub.textContent = 'Rational Method implementation following the SANRAL Drainage Manual, Section 3.1.1 (6th ed., worked example verified) — including the 10%–85% slope method, catchment-characteristic runoff coefficients (Tables 3.3–3.5), and coordinate-based design rainfall lookup from the SA Weather Bureau TR102 station archive.';
+  } else {
+    eyebrow.textContent = 'Civil Engineering Design';
+    h1sub.textContent = '— Stormwater & Water Services Calculator';
+    sub.textContent = 'Two independent toolsets in one app: Stormwater Peak Flow (SANRAL Drainage Manual Rational Methods, Standard Design Flood, Unit Hydrograph, and Empirical MIPI-71) and Water & Sewer Demand (CSIR Red Book, Sections J & K) — pick a section below to begin.';
+  }
+}
 
 function render(){
+  const switchBtn = document.getElementById('section-switch');
+  if(switchBtn) switchBtn.style.display = !S.section ? 'none' : 'inline-flex';
+  updateAppHeader();
+  if(!S.section){ renderHome(); updatePrintHeader(); return; }
   renderTabs();
-  document.getElementById('footer').innerHTML = FOOTER_TEXT[S.tab] || FOOTER_TEXT[0];
+  const defs = currentTabDefs();
+  document.getElementById('footer').innerHTML = (defs[S.tab] && defs[S.tab].footer) || defs[0].footer;
   updatePrintHeader();
-  if(S.tab===0) renderProject();
-  if(S.tab===1) renderRational1();
-  if(S.tab===2) renderRational();
-  if(S.tab===3) renderSDF();
-  if(S.tab===4) renderUH();
-  if(S.tab===5) renderEmpirical();
-  if(S.tab===6) renderSummary();
+  if(defs[S.tab] && defs[S.tab].render) defs[S.tab].render();
 }
 
 // ================= COMPUTATIONS =================
@@ -1155,6 +1292,83 @@ function computePtT(Tc, weighted, R=S.R_thunder){
   return {values: out, mode, M};
 }
 
+// ---- DRE-SA import (Rational Method, Alt. 3): parses the plain-text export from
+// SANRAL's external Design Rainfall Estimation software — specifically the "Gridded
+// values of all points within the specified block" table, which gives point rainfall
+// for the exact coordinates requested across every duration (5 min–7 day) and return
+// period (2–200 yr). Only the best-estimate column of each triplet (best/lower/upper)
+// is used. Once loaded, recalcRA3() interpolates log-linearly across duration for
+// whatever T_C the catchment inputs produce, for every return period, so nothing needs
+// re-importing if the catchment area or slope changes. ----
+function parseDRESAExport(text){
+  const marker = 'Gridded values of all points within the specified block';
+  const idx = text.indexOf(marker);
+  if(idx===-1) return null;
+  const unitToHours = {m:1/60, h:1, d:24};
+  const durations = [];
+  const values = {}; RETURN_PERIODS.forEach(t=>{ values[t] = []; });
+  text.slice(idx).split(/\r?\n/).forEach(raw=>{
+    const tokens = raw.trim().split(/\s+/).filter(Boolean);
+    // Every duration row ends in: <duration number> <duration unit> <21 numbers>
+    // (7 return periods × best/lower/upper). The first row also carries 6 leading
+    // header numbers (lat/lon deg+min, MAP, altitude); later rows are blank there.
+    if(tokens.length!==23 && tokens.length!==29) return;
+    const tail = tokens.slice(-23);
+    const durNum = parseFloat(tail[0]), durUnit = tail[1];
+    if(!Number.isFinite(durNum) || !unitToHours.hasOwnProperty(durUnit)) return;
+    const nums = tail.slice(2).map(Number);
+    if(nums.length!==21 || nums.some(n=>!Number.isFinite(n))) return;
+    durations.push(durNum*unitToHours[durUnit]);
+    RETURN_PERIODS.forEach((t,i)=>{ values[t].push(nums[i*3]); }); // best estimate = first of each triple
+  });
+  if(durations.length<2) return null;
+  const order = durations.map((h,i)=>i).sort((a,b)=>durations[a]-durations[b]);
+  const sortedDurations = order.map(i=>durations[i]);
+  const sortedValues = {}; RETURN_PERIODS.forEach(t=>{ sortedValues[t] = order.map(i=>values[t][i]); });
+  return { durations: sortedDurations, values: sortedValues };
+}
+function interpDREDuration(dre, hours, t){
+  if(!dre || hours===null || hours===undefined || isNaN(hours)) return null;
+  const durs = dre.durations, vals = dre.values[t];
+  if(!durs || !durs.length) return null;
+  if(hours<=durs[0]) return vals[0];
+  if(hours>=durs[durs.length-1]) return vals[durs.length-1];
+  for(let i=0;i<durs.length-1;i++){
+    if(hours>=durs[i] && hours<=durs[i+1]){
+      const x0=Math.log(durs[i]), x1=Math.log(durs[i+1]), x=Math.log(hours);
+      const f = x1===x0 ? 0 : (x-x0)/(x1-x0);
+      return vals[i] + f*(vals[i+1]-vals[i]);
+    }
+  }
+  return null;
+}
+
+// Every P_t,T table below rebuilds its <input> cells via innerHTML on each keystroke
+// (values/touched-state/downstream results all need to redraw together). That wipes
+// focus mid-type, so a single keystroke would apply then the input would go dead until
+// clicked again. This wraps a table's innerHTML rebuild, remembering which cell (by
+// data-t) had focus and its cursor position, and restoring both afterwards.
+// NOTE: this only works because the P_t,T cells are type="text" — <input type="number">
+// doesn't support selectionStart/selectionEnd/setSelectionRange in Chromium, so cursor
+// restore silently no-ops and the caret snaps back to position 0 after every rebuild,
+// which made digits type in reverse order. Keep these fields type="text" (with
+// inputmode="decimal" for a numeric keyboard on mobile/tablet) rather than type="number". ----
+function withInputFocusPreserved(tbl, renderFn){
+  const active = document.activeElement;
+  let restore = null;
+  if(active && tbl.contains(active) && active.tagName==='INPUT'){
+    restore = { t: active.dataset.t, start: active.selectionStart, end: active.selectionEnd };
+  }
+  renderFn();
+  if(restore){
+    const el = tbl.querySelector(`input[data-t="${restore.t}"]`);
+    if(el){
+      el.focus();
+      try{ el.setSelectionRange(restore.start, restore.end); }catch(e){}
+    }
+  }
+}
+
 function renderStormTable(Tc, weighted){
   const statusEl = document.getElementById('tc_status');
   const {values, mode, M} = computePtT(Tc, weighted);
@@ -1169,23 +1383,26 @@ function renderStormTable(Tc, weighted){
   });
 
   const tbl = document.getElementById('storm_table');
-  tbl.innerHTML = `
-    <tr><th class="rowlabel">Return period</th>${RETURN_PERIODS.map(t=>`<th>1:${t}</th>`).join('')}</tr>
-    <tr><td class="rowlabel">P<sub>t,T</sub> (mm)</td>${RETURN_PERIODS.map(t=>{
-      const touched = S.ptT_touched.has(t);
-      return `<td><input type="number" step="0.1" style="width:64px;text-align:center;background:${touched?'rgba(227,168,87,0.12)':'transparent'};border:1px solid ${touched?'var(--amber)':'var(--line)'};border-radius:5px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px;" data-t="${t}" value="${S.ptT[t]===null?'':S.ptT[t]}"></td>`;
-    }).join('')}</tr>
-    <tr><td class="rowlabel" style="font-size:10.5px;">Source</td>${RETURN_PERIODS.map(t=>{
-      const touched = S.ptT_touched.has(t);
-      return `<td>${touched ? '<span class="flag" style="color:var(--amber);">Alt 1/3 (manual)</span>' : '<span class="flag" style="color:var(--cyan);border-color:rgba(111,195,232,0.4);background:rgba(111,195,232,0.08);">Alt 2 (auto)</span>'}</td>`;
-    }).join('')}</tr>
-  `;
-  [...tbl.querySelectorAll('input')].forEach(inp=>{
-    inp.addEventListener('input', e=>{
-      const t = +e.target.dataset.t;
-      S.ptT_touched.add(t);
-      S.ptT[t] = e.target.value==='' ? null : +e.target.value;
-      recalcAll();
+  withInputFocusPreserved(tbl, ()=>{
+    tbl.innerHTML = `
+      <tr><th class="rowlabel">Return period</th>${RETURN_PERIODS.map(t=>`<th>1:${t}</th>`).join('')}</tr>
+      <tr><td class="rowlabel">P<sub>t,T</sub> (mm)</td>${RETURN_PERIODS.map(t=>{
+        const touched = S.ptT_touched.has(t);
+        return `<td><input type="text" inputmode="decimal" autocomplete="off" style="width:64px;text-align:center;background:${touched?'rgba(227,168,87,0.12)':'transparent'};border:1px solid ${touched?'var(--amber)':'var(--line)'};border-radius:5px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px;" data-t="${t}" value="${S.ptT[t]===null?'':S.ptT[t]}"></td>`;
+      }).join('')}</tr>
+      <tr><td class="rowlabel" style="font-size:10.5px;">Source</td>${RETURN_PERIODS.map(t=>{
+        const touched = S.ptT_touched.has(t);
+        return `<td>${touched ? '<span class="flag" style="color:var(--amber);">Alt 1/3 (manual)</span>' : '<span class="flag" style="color:var(--cyan);border-color:var(--eq-border);background:var(--eq-bg);">Alt 2 (auto)</span>'}</td>`;
+      }).join('')}</tr>
+    `;
+    [...tbl.querySelectorAll('input')].forEach(inp=>{
+      inp.addEventListener('input', e=>{
+        const t = +e.target.dataset.t;
+        e.target.value = e.target.value.replace(/[^0-9.]/g, ''); // free-text field now (see withInputFocusPreserved note) — keep it numeric-only
+        S.ptT_touched.add(t);
+        S.ptT[t] = e.target.value==='' ? null : +e.target.value;
+        recalcAll();
+      });
     });
   });
 }
@@ -2001,8 +2218,419 @@ function m1StepResults(){
   </div>`;
 }
 
+// ================= RATIONAL METHOD (ALTERNATIVE 3) =================
+// SANRAL's Alternative 3: point rainfall comes from the separate Design Rainfall
+// Estimation software (an external tool, not a printed table), so P_t,T is manual
+// entry only — no auto-fill stand-in, unlike Method 1. Area/T_C/characteristics are
+// the exact same shared catchment description as Methods 1 and 2 (kept in sync via
+// the same syncX() functions). The one deliberate formula difference: no ARF is
+// applied — confirmed against the manual's own Moretele Spruit worked example, where
+// back-checking Alt 3's Q ratios against Alt 2's only matches if ARF is skipped.
+function ra3StepArea(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">1</span><span class="step-title">Catchment area</span></div>
+    <p class="step-note">Same shared catchment description as Rational Methods 1 and 2 — area, T<sub>C</sub>, and catchment characteristics are identical across all three alternatives; only the rainfall source differs.</p>
+    <div class="grid grid-3">
+      <div class="field"><label>Catchment area, A <span class="unit">km²</span></label><input type="number" step="0.01" id="ra3_A" value="${iv(S5.A)}"></div>
+    </div>
+    <div id="ra3_area_caveat"></div>
+  </div>`;
+}
+function wireRA3Area(){
+  document.getElementById('ra3_A').addEventListener('input', e=>{ syncA(numOrNaN(e.target.value)); recalcRA3(); });
+}
+
+function ra3StepTc(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">2</span><span class="step-title">Time of concentration</span></div>
+    <p class="step-note">Same as the other Rational Method tabs — enter the length and the two end elevations; we derive the height difference (overland) or the 10%/85% points (watercourse, eq. 3.1) automatically, assuming a uniform slope between them.</p>
+    <div class="grid grid-3">
+      <div class="field"><label>Longest watercourse, L <span class="unit">km</span></label><input type="number" step="0.01" id="ra3_tcL" value="${iv(S5.tcL)}"></div>
+      <div class="field"><label>Elevation 1 — lowest (outlet) <span class="unit">m</span></label><input type="number" step="0.1" id="ra3_elevLow" value="${iv(S5.elevLow)}"></div>
+      <div class="field"><label>Elevation 2 — highest <span class="unit">m</span></label><input type="number" step="0.1" id="ra3_elevHigh" value="${iv(S5.elevHigh)}"></div>
+    </div>
+    <div class="toggle" id="ra3_tc_toggle" style="margin-top:14px;">
+      <button data-m="overland" class="${S5.tcMethod==='overland'?'active':''}">Overland flow</button>
+      <button data-m="channel" class="${S5.tcMethod==='channel'?'active':''}">Defined watercourse (channel)</button>
+    </div>
+    <div id="ra3_tc_fields"></div>
+    <div class="outbox" id="ra3_tc_out"></div>
+  </div>`;
+}
+function ra3TcFieldsOverland(){
+  return `
+    <div class="eq">T<sub>C</sub> = 0.604 · (r·L / √S<sub>av</sub>)<sup>0.467</sup>  hours &nbsp;·&nbsp; S<sub>av</sub> = H / (1000·L) &nbsp;·&nbsp; H = Elev. 2 − Elev. 1</div>
+    <div class="grid grid-3">
+      <div class="field"><label>Retardance coeff., r</label>
+        <select id="ra3_ov_r">${R_TABLE.map(([name,val])=>`<option value="${val}" ${(+S5.ov.r===val)?'selected':''}>${name} (${val})</option>`).join('')}</select>
+      </div>
+    </div>`;
+}
+function ra3TcFieldsChannel(){
+  return `
+    <div class="eq">T<sub>C</sub> = (0.87·L² / (1000·S<sub>av</sub>))<sup>0.385</sup>  hours &nbsp;·&nbsp; S<sub>av</sub> = (H<sub>0.85L</sub> − H<sub>0.10L</sub>) / (1000 · 0.75L)</div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);cursor:pointer;margin-bottom:8px;">
+      <input type="checkbox" id="ra3_ch_override" ${S5.chProfileOverride?'checked':''} style="accent-color:var(--cyan);width:14px;height:14px;">
+      I have surveyed elevations at the actual 10%/85% points (more accurate than assuming uniform slope)
+    </label>
+    <div id="ra3_ch_override_fields"></div>`;
+}
+function ra3ChOverrideFields(){
+  if(!S5.chProfileOverride) return '';
+  const {H10,H85} = computeTcFor(S5);
+  return `<div class="grid grid-3">
+    <div class="field"><label>Elevation at 10% of L, H₀.₁₀L <span class="unit">m</span></label><input type="number" step="0.1" id="ra3_ch_H10" value="${S5.chH10manual!==null?S5.chH10manual:fmt(H10,1)}"></div>
+    <div class="field"><label>Elevation at 85% of L, H₀.₈₅L <span class="unit">m</span></label><input type="number" step="0.1" id="ra3_ch_H85" value="${S5.chH85manual!==null?S5.chH85manual:fmt(H85,1)}"></div>
+  </div>`;
+}
+function wireRA3Tc(){
+  document.getElementById('ra3_tcL').addEventListener('input', e=>{syncTcL(numOrNaN(e.target.value)); recalcRA3();});
+  document.getElementById('ra3_elevLow').addEventListener('input', e=>{syncElevLow(numOrNaN(e.target.value)); recalcRA3();});
+  document.getElementById('ra3_elevHigh').addEventListener('input', e=>{syncElevHigh(numOrNaN(e.target.value)); recalcRA3();});
+
+  document.getElementById('ra3_tc_fields').innerHTML = S5.tcMethod==='overland' ? ra3TcFieldsOverland() : ra3TcFieldsChannel();
+  [...document.getElementById('ra3_tc_toggle').children].forEach(btn=>{
+    btn.onclick = ()=>{ syncTcMethod(btn.dataset.m); renderRationalAlt3(); };
+  });
+  if(S5.tcMethod==='overland'){
+    document.getElementById('ra3_ov_r').addEventListener('input', e=>{syncOvR(+e.target.value); recalcRA3();});
+  } else {
+    const overrideCb = document.getElementById('ra3_ch_override');
+    document.getElementById('ra3_ch_override_fields').innerHTML = ra3ChOverrideFields();
+    overrideCb.addEventListener('change', e=>{
+      syncChOverride(e.target.checked);
+      renderRationalAlt3();
+    });
+    const h10el = document.getElementById('ra3_ch_H10'), h85el = document.getElementById('ra3_ch_H85');
+    if(h10el) h10el.addEventListener('input', e=>{syncChH10(+e.target.value); recalcRA3();});
+    if(h85el) h85el.addEventListener('input', e=>{syncChH85(+e.target.value); recalcRA3();});
+  }
+}
+
+function ra3StepRainfall(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">3</span><span class="step-title">Design storm — point rainfall (Alternative 3)</span></div>
+    <p class="step-note">SANRAL's Alternative 3 uses the separate <b>Design Rainfall Estimation</b> software — an external tool, not a printed table, so FlowIQ can't look this up directly. Instead, run that software once for your coordinates, save its plain-text output, and import it below — FlowIQ then reads off point rainfall for whatever T<sub>C</sub> the catchment inputs produce (interpolating log-linearly across duration) for every return period, so nothing needs re-importing if the catchment area or slope changes later. No export file yet? Enter each P<sub>t,T</sub> value by hand instead. <b>No ARF is applied for this alternative</b> — confirmed against the manual's own worked example, point intensity is used directly as the catchment-average intensity.</p>
+    <div class="grid grid-3" style="margin-bottom:6px;">
+      ${dmsFieldHTML('ra3','lat',S5.coord.lat,'Latitude','S')}
+      ${dmsFieldHTML('ra3','lon',S5.coord.lon,'Longitude','E')}
+      <div class="field"><label>Design return period (headline) <span class="unit">years</span></label>
+        <select id="ra3_Tdesign">${RETURN_PERIODS.map(t=>`<option value="${t}" ${t===S5.T_design?'selected':''}>1:${t}</option>`).join('')}</select>
+      </div>
+    </div>
+    <p class="hint">Coordinates here are for your own reference when running the external software — FlowIQ doesn't look anything up from them for this tab; it's the imported file's own gridded values that matter.</p>
+    <div class="field" style="margin-bottom:10px;max-width:420px;">
+      <label>Import DRE-SA export file <span class="unit">.txt</span></label>
+      <input type="file" id="ra3_dre_file" accept=".txt,.csv,text/plain">
+    </div>
+    <div id="ra3_dre_status" class="hint" style="margin-bottom:10px;"></div>
+    <table class="dtab" id="ra3_storm_table"></table>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+      <button id="ra3_btn_reset_ptt" class="tab" style="border:1px solid var(--line);border-radius:8px;padding:6px 14px;flex:none;cursor:pointer;">Reset all P<sub>t,T</sub> to imported values</button>
+      <button id="ra3_btn_clear_dre" class="tab" style="border:1px solid var(--line);border-radius:8px;padding:6px 14px;flex:none;cursor:pointer;">Clear import</button>
+    </div>
+  </div>`;
+}
+function wireRA3Rainfall(){
+  wireDMSCoord('ra3','lat', syncCoordLat, recalcRA3);
+  wireDMSCoord('ra3','lon', syncCoordLon, recalcRA3);
+  document.getElementById('ra3_Tdesign').addEventListener('input', e=>{ syncTDesign(+e.target.value); recalcRA3(); });
+  document.getElementById('ra3_dre_file').addEventListener('change', e=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const parsed = parseDRESAExport(ev.target.result);
+      if(!parsed){
+        alert('Could not find a "Gridded values of all points within the specified block" table in this file — make sure it\'s the raw text export from SANRAL\'s Design Rainfall Estimation software.');
+      } else {
+        S5.dre = { ...parsed, filename: file.name };
+        S5.ptT_touched.clear();
+        recalcRA3();
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+  document.getElementById('ra3_btn_reset_ptt').addEventListener('click', ()=>{ S5.ptT_touched.clear(); recalcRA3(); });
+  document.getElementById('ra3_btn_clear_dre').addEventListener('click', ()=>{
+    S5.dre = null; S5.ptT_touched.clear(); recalcRA3();
+  });
+}
+
+function ra3StepCharacteristics(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">4</span><span class="step-title">Catchment characteristics — runoff coefficient</span></div>
+    <p class="step-note">Tables 3.3–3.5, identical formula and shared values with the other two Rational Method tabs.</p>
+    <div class="grid grid-2">
+      <div class="field"><label>Catchment preset</label>
+        <select id="ra3_preset">${CATCHMENT_PRESETS.map(p=>`<option value="${p.id}">${p.label}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Rainfall zone (MAP band)</label>
+        <select id="ra3_band">
+          <option value="-1">Auto from nearby stations</option>
+          ${MAP_BANDS.map((b,i)=>`<option value="${i}" ${S5.mapBandOverride===i?'selected':''}>${b} mm</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-top:2px;">
+      <div class="field"><label>Rural fraction, α <span class="unit">%</span></label><input type="number" step="1" id="ra3_alpha" value="${S5.alpha}"></div>
+      <div class="field"><label>Urban fraction, β <span class="unit">%</span></label><input type="number" step="1" id="ra3_beta" value="${S5.beta}"></div>
+    </div>
+    <div class="outbox" id="ra3_ct_summary" style="margin-top:8px;"></div>
+
+    <details class="ref" style="margin-top:16px;">
+      <summary>Fine-tune rural breakdown — Table 3.3 / 3.4 (C₁)</summary>
+      <div class="charblock">
+        ${ra3CompRows('cs', CS_TABLE.labels, S5.rural.cs)}
+        ${ra3CompRows('cp', CP_TABLE.labels, S5.rural.cp)}
+        ${ra3CompRows('cv', CV_TABLE.labels, S5.rural.cv)}
+        <div class="grid grid-2" style="margin-top:14px;">
+          <div class="field"><label>Dolomitic area, D% <span class="unit">%</span></label><input type="number" step="1" id="ra3_dolomite" value="${S5.dolomitePct}"></div>
+          <div class="field"><label>Initial-saturation curve, F<sub>T</sub></label>
+            <select id="ra3_ftcurve">
+              <option value="flat" ${S5.ftCurve==='flat'?'selected':''}>Flat &amp; permeable</option>
+              <option value="steep" ${S5.ftCurve==='steep'?'selected':''}>Steep &amp; impermeable</option>
+            </select>
+          </div>
+        </div>
+        <div class="outbox" id="ra3_c1_out"></div>
+      </div>
+    </details>
+
+    <details class="ref" style="margin-top:10px;">
+      <summary>Fine-tune urban breakdown — Table 3.3 / 3.5 (C₂)</summary>
+      <div class="charblock">
+        <div id="ra3_urban_rows"></div>
+        <div class="outbox" id="ra3_c2_out"></div>
+      </div>
+    </details>
+  </div>`;
+}
+function ra3CompRows(key, labels, values){
+  return `<div class="comp-title">${key.toUpperCase()}</div>` + labels.map((lab,i)=>`
+    <div class="pct-row">
+      <span>${lab}</span>
+      <input type="number" step="1" class="ra3-comp-input" data-comp="${key}" data-i="${i}" value="${values[i]}">
+      <span class="cval">%</span>
+    </div>`).join('') + `<div class="pct-total" data-total="ra3-${key}"></div>`;
+}
+function wireRA3Characteristics(){
+  const presetSel = document.getElementById('ra3_preset');
+  presetSel.value = S5.selectedPreset;
+  presetSel.addEventListener('input', e=>{
+    syncPresetApply(e.target.value);
+    renderRationalAlt3();
+  });
+  document.getElementById('ra3_alpha').addEventListener('input', e=>{ syncAlpha(+e.target.value); document.getElementById('ra3_beta').value=S5.beta; S5.selectedPreset='custom'; presetSel.value='custom'; recalcRA3(); });
+  document.getElementById('ra3_beta').addEventListener('input', e=>{ syncBeta(+e.target.value); document.getElementById('ra3_alpha').value=S5.alpha; S5.selectedPreset='custom'; presetSel.value='custom'; recalcRA3(); });
+  document.getElementById('ra3_band').addEventListener('input', e=>{ syncMapBand(e.target.value==='-1'?null:+e.target.value); recalcRA3(); });
+  document.getElementById('ra3_dolomite').addEventListener('input', e=>{ syncDolomite(+e.target.value); recalcRA3(); });
+  document.getElementById('ra3_ftcurve').addEventListener('input', e=>{ syncFtCurve(e.target.value); recalcRA3(); });
+  [...document.querySelectorAll('.ra3-comp-input')].forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const comp=e.target.dataset.comp, i=+e.target.dataset.i;
+      syncRuralComp(comp, i, +e.target.value);
+      S5.selectedPreset='custom'; presetSel.value='custom';
+      recalcRA3();
+    });
+  });
+  ra3RenderUrbanRows();
+}
+function ra3RenderUrbanRows(){
+  const presetSel = document.getElementById('ra3_preset');
+  const el = document.getElementById('ra3_urban_rows');
+  el.innerHTML = URBAN_TABLE.map((u,i)=>{
+    const [label, lo, hi] = u;
+    const fixed = lo===hi;
+    return `<div class="pct-row" style="grid-template-columns:1.4fr 60px 90px;">
+      <span>${label} ${fixed?'':`<span class="hint" style="display:inline;">(${lo}–${hi})</span>`}</span>
+      <input type="number" step="1" class="ra3-urb-pct" data-i="${i}" value="${S5.urban[i]}">
+      <input type="number" step="0.01" class="ra3-urb-factor" data-i="${i}" value="${S5.urbanFactor[i]}" ${fixed?'disabled':''}>
+    </div>`;
+  }).join('') + `<div class="pct-total" data-total="ra3-urban"></div>`;
+  [...el.querySelectorAll('.ra3-urb-pct')].forEach(inp=>inp.addEventListener('input', e=>{ syncUrbanPct(+e.target.dataset.i, +e.target.value); S5.selectedPreset='custom'; presetSel.value='custom'; recalcRA3(); }));
+  [...el.querySelectorAll('.ra3-urb-factor')].forEach(inp=>inp.addEventListener('input', e=>{ syncUrbanFactor(+e.target.dataset.i, +e.target.value); S5.selectedPreset='custom'; presetSel.value='custom'; recalcRA3(); }));
+}
+
+function ra3StepResults(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">5</span><span class="step-title">Peak discharge</span></div>
+    <div class="eq">Q<sub>T</sub> = C<sub>T</sub> · I<sub>T</sub> · A / 3.6  (eq. 3.13) — I<sub>T</sub> = P<sub>t,T</sub> / T<sub>C</sub> directly, no ARF for this alternative</div>
+    <div class="result-hero">
+      <span class="tag">Peak flow at design return period</span>
+      <div class="big" id="ra3_res_headline">—<span class="u">m³/s</span></div>
+      <table class="restab" id="ra3_res_table"></table>
+    </div>
+    ${printBtn('Print / Save as PDF — Rational Method (Alt. 3)')}
+  </div>`;
+}
+
+function renderRationalAlt3(){
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    ${ra3StepArea()}
+    ${ra3StepTc()}
+    ${ra3StepRainfall()}
+    ${ra3StepCharacteristics()}
+    ${ra3StepResults()}
+    ${printCompactRA3()}
+  `;
+  wireRA3Area(); wireRA3Tc(); wireRA3Rainfall(); wireRA3Characteristics();
+  recalcRA3();
+}
+
+function recalcRA3(){
+  const areaCaveatEl = document.getElementById('ra3_area_caveat');
+  if(areaCaveatEl){
+    areaCaveatEl.innerHTML = (S5.A>15)
+      ? `<p class="hint" style="color:var(--amber);margin-top:6px;">A = ${fmt(S5.A,1)} km² exceeds the ~15 km² guideline for the Rational Method.</p>`
+      : '';
+  }
+  const {Sav, Tc, H, H10, H85} = computeTcFor(S5);
+  const h1085Line = (S5.tcMethod==='channel' && H10!==null && H85!==null)
+    ? ` &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">H<sub>0.10L</sub> / H<sub>0.85L</sub></span> ${fmt(H10,1)} / ${fmt(H85,1)} m`
+    : (S5.tcMethod==='overland' && H!==null) ? ` &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">H</span> ${fmt(H,1)} m` : '';
+  document.getElementById('ra3_tc_out').innerHTML = Tc===null
+    ? `<span class="lbl">Time of concentration</span>Enter valid inputs above.`
+    : `<span class="lbl">Average slope S<sub>av</sub></span>${fmt(Sav,5)} m/m &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">T<sub>C</sub></span> ${fmt(Tc,3)} h (${(Tc*60).toFixed(0)} min)${h1085Line}`;
+
+  if(S5.dre){
+    RETURN_PERIODS.forEach(t=>{
+      if(!S5.ptT_touched.has(t)){
+        const v = interpDREDuration(S5.dre, Tc, t);
+        S5.ptT[t] = (v===null || isNaN(v)) ? null : +v.toFixed(1);
+      }
+    });
+  }
+  const dreStatusEl = document.getElementById('ra3_dre_status');
+  if(dreStatusEl){
+    dreStatusEl.innerHTML = !S5.dre
+      ? `No DRE-SA export loaded yet — point rainfall below is entered by hand.`
+      : (Tc===null
+        ? `Loaded <b style="color:var(--text)">${S5.dre.filename}</b> (${S5.dre.durations.length} durations imported, ${fmt(S5.dre.durations[0]*60,0)} min – ${fmt(S5.dre.durations[S5.dre.durations.length-1]/24,1)} d). Complete Step 2 to interpolate for T<sub>C</sub>.`
+        : `Loaded <b style="color:var(--text)">${S5.dre.filename}</b> — point rainfall interpolated log-linearly across duration for T<sub>C</sub> = ${fmt(Tc,3)} h, from ${S5.dre.durations.length} imported durations.`);
+  }
+
+  const tbl = document.getElementById('ra3_storm_table');
+  withInputFocusPreserved(tbl, ()=>{
+    tbl.innerHTML = `
+      <tr><th class="rowlabel">Return period</th>${RETURN_PERIODS.map(t=>`<th>1:${t}</th>`).join('')}</tr>
+      <tr><td class="rowlabel">P<sub>t,T</sub> (mm)</td>${RETURN_PERIODS.map(t=>{
+        const touched = S5.ptT_touched.has(t);
+        return `<td><input type="text" inputmode="decimal" autocomplete="off" style="width:64px;text-align:center;background:${touched?'rgba(227,168,87,0.12)':'transparent'};border:1px solid ${touched?'var(--amber)':'var(--line)'};border-radius:5px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px;" data-t="${t}" value="${S5.ptT[t]===null?'':S5.ptT[t]}"></td>`;
+      }).join('')}</tr>
+      ${S5.dre ? `<tr><td class="rowlabel" style="font-size:10.5px;">Source</td>${RETURN_PERIODS.map(t=>{
+        const touched = S5.ptT_touched.has(t);
+        return `<td>${touched ? '<span class="flag" style="color:var(--amber);">Manual</span>' : '<span class="flag" style="color:var(--cyan);border-color:var(--eq-border);background:var(--eq-bg);">Auto (DRE-SA)</span>'}</td>`;
+      }).join('')}</tr>` : ''}
+    `;
+    [...tbl.querySelectorAll('input')].forEach(inp=>{
+      inp.addEventListener('input', e=>{
+        const t = +e.target.dataset.t;
+        e.target.value = e.target.value.replace(/[^0-9.]/g, ''); // free-text field now (see withInputFocusPreserved note) — keep it numeric-only
+        S5.ptT_touched.add(t);
+        S5.ptT[t] = e.target.value==='' ? null : +e.target.value;
+        recalcRA3();
+      });
+    });
+  });
+
+  const nearest5 = nearestStationsFor(S5.coord.lat, S5.coord.lon, 3);
+  const weighted5 = weightedStationData(nearest5);
+  const mapForBand5 = weighted5 ? weighted5.map : null;
+  const {C1, C1D, band} = computeC1(S5, mapForBand5);
+  document.getElementById('ra3_c1_out').innerHTML = `<span class="lbl">Rainfall zone used</span>${MAP_BANDS[band]} mm &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">C₁</span> ${fmt(C1,4)} &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">C₁D (dolomite-adj.)</span> ${fmt(C1D,4)}`;
+  ['cs','cp','cv'].forEach(k=>{
+    const tot = S5.rural[k].reduce((a,b)=>a+(+b||0),0);
+    const totEl = document.querySelector(`[data-total="ra3-${k}"]`);
+    if(totEl){ totEl.textContent = `Total: ${tot}%`; totEl.className = 'pct-total ' + (tot===100?'ok':'bad'); }
+  });
+
+  const {C2, pctSum} = computeC2(S5);
+  document.getElementById('ra3_c2_out').innerHTML = `<span class="lbl">C₂</span>${fmt(C2,4)}`;
+  const urbTotEl = document.querySelector('[data-total="ra3-urban"]');
+  if(urbTotEl){ urbTotEl.textContent = `Total: ${pctSum}%`; urbTotEl.className = 'pct-total ' + (pctSum===100?'ok':'bad'); }
+
+  const alphaPreview = clamp01((+S5.alpha||0)/100), betaPreview = clamp01((+S5.beta||0)/100);
+  const ftPreview = ftForT(S5.T_design, S5);
+  const ctPreview = alphaPreview*(C1D*ftPreview) + betaPreview*C2;
+  const ctSummaryEl = document.getElementById('ra3_ct_summary');
+  if(ctSummaryEl) ctSummaryEl.innerHTML = `<span class="lbl">C<sub>T</sub> at 1:${S5.T_design}</span>${fmt(ctPreview,3)} &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">preset</span>${CATCHMENT_PRESETS.find(p=>p.id===S5.selectedPreset)?.label || 'Custom'}`;
+
+  const alpha = clamp01((+S5.alpha||0)/100), beta = clamp01((+S5.beta||0)/100);
+  const rows = RETURN_PERIODS.map(t=>{
+    const Ft = ftForT(t, S5);
+    const C1T = C1D*Ft;
+    const CT = alpha*C1T + beta*C2;
+    const PtT = S5.ptT[t];
+    let PiT=null, IT=null, QT=null;
+    if(PtT!==null && Tc!==null && Tc>0){
+      PiT = PtT / Math.max(Tc, 0.25);
+      IT = PiT; // Alternative 3: no ARF applied — see step note and footer for the worked-example check
+      QT = CT*IT*S5.A/3.6;
+    }
+    return {t, Ft, C1T, CT, PtT, PiT, IT, QT};
+  });
+
+  const rtbl = document.getElementById('ra3_res_table');
+  rtbl.innerHTML = `
+    <tr><th class="rowlabel">Return period</th>${rows.map(r=>`<th>1:${r.t}</th>`).join('')}</tr>
+    <tr><td class="rowlabel">F<sub>T</sub></td>${rows.map(r=>`<td>${fmt(r.Ft,2)}</td>`).join('')}</tr>
+    <tr><td class="rowlabel">C<sub>T</sub></td>${rows.map(r=>`<td>${fmt(r.CT,3)}</td>`).join('')}</tr>
+    <tr><td class="rowlabel">I<sub>T</sub> (mm/h)</td>${rows.map(r=>`<td>${r.IT===null?'—':fmt(r.IT,1)}</td>`).join('')}</tr>
+    <tr class="hi"><td class="rowlabel">Q<sub>T</sub> (m³/s)</td>${rows.map(r=>`<td>${r.QT===null?'—':fmt(r.QT,2)}</td>`).join('')}</tr>
+  `;
+  const headline = rows.find(r=>r.t===S5.T_design);
+  document.getElementById('ra3_res_headline').innerHTML = headline && headline.QT!==null
+    ? `${fmt(headline.QT,2)}<span class="u">m³/s at 1:${S5.T_design}</span>`
+    : `—<span class="u">m³/s</span>`;
+}
+
+function summaryRA3(){
+  const {Tc} = computeTcFor(S5);
+  const nearest5 = nearestStationsFor(S5.coord.lat, S5.coord.lon, 3);
+  const weighted5 = weightedStationData(nearest5);
+  const mapForBand5 = weighted5 ? weighted5.map : null;
+  const {C1D} = computeC1(S5, mapForBand5);
+  const {C2} = computeC2(S5);
+  const alpha=clamp01((+S5.alpha||0)/100), beta=clamp01((+S5.beta||0)/100);
+  return RETURN_PERIODS.map((t,i)=>{
+    const Ft = ftForT(t, S5);
+    const CT = alpha*(C1D*Ft) + beta*C2;
+    const PtT = S5.ptT[t];
+    if(PtT===null || Tc===null || Tc<=0) return null;
+    const PiT = PtT / Math.max(Tc, 0.25);
+    return CT*PiT*S5.A/3.6;
+  });
+}
+function printCompactRA3(){
+  const {Tc, Sav} = computeTcFor(S5);
+  const nearest5 = nearestStationsFor(S5.coord.lat, S5.coord.lon, 3);
+  const weighted5 = weightedStationData(nearest5);
+  const mapForBand5 = weighted5 ? weighted5.map : null;
+  const {C1D} = computeC1(S5, mapForBand5);
+  const {C2} = computeC2(S5);
+  const alpha=clamp01((+S5.alpha||0)/100), beta=clamp01((+S5.beta||0)/100);
+  const Ft = ftForT(S5.T_design, S5);
+  const CT = alpha*(C1D*Ft) + beta*C2;
+  const vals = summaryRA3();
+  return printCompactHTML('Rational Method (Alternative 3 — Design Rainfall Estimation)', [
+    ['Catchment area, A', `${fmt(S5.A,2)} km²`],
+    ['Average slope, Sav', Sav===null||Sav===undefined?'—':`${fmt(Sav*100,2)} % (${fmt(Sav,4)} m/m)`],
+    ['Time of concentration, Tc', Tc===null?'—':`${fmt(Tc,2)} h`],
+    ['Area reduction factor, ARF', 'Not applied for this alternative'],
+    ['Rural / urban split', `${fmt(S5.alpha,0)}% / ${fmt(S5.beta,0)}%`],
+    ['Design return period', `1:${S5.T_design}`],
+  ], vals, (S5.dre
+    ? `Point rainfall auto-filled by importing SANRAL's Design Rainfall Estimation software export (${S5.dre.filename}) and interpolating log-linearly across duration for T_C; see the working tab for the full storm table.`
+    : 'Point rainfall entered by hand from SANRAL\'s external Design Rainfall Estimation software; see the working tab for the full storm table.'),
+  coefficientBreakdownRows(S5, C1D, C2, CT));
+}
+
 function recalcM1(){
   const areaCaveatEl = document.getElementById('m1_area_caveat');
+
   if(areaCaveatEl){
     areaCaveatEl.innerHTML = (S1.A>15)
       ? `<p class="hint" style="color:var(--amber);margin-top:6px;">A = ${fmt(S1.A,1)} km² exceeds the ~15 km² guideline for the Rational Method.</p>`
@@ -2041,23 +2669,26 @@ function recalcM1(){
   }
 
   const tbl = document.getElementById('m1_storm_table');
-  tbl.innerHTML = `
-    <tr><th class="rowlabel">Return period</th>${RETURN_PERIODS.map(t=>`<th>1:${t}</th>`).join('')}</tr>
-    <tr><td class="rowlabel">P<sub>t,T</sub> (mm)</td>${RETURN_PERIODS.map(t=>{
-      const touched = S1.ptT_touched.has(t);
-      return `<td><input type="number" step="0.1" style="width:64px;text-align:center;background:${touched?'rgba(227,168,87,0.12)':'transparent'};border:1px solid ${touched?'var(--amber)':'var(--line)'};border-radius:5px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px;" data-t="${t}" value="${S1.ptT[t]===null?'':S1.ptT[t]}"></td>`;
-    }).join('')}</tr>
-    ${S1.autoFillPtT ? `<tr><td class="rowlabel" style="font-size:10.5px;">Source</td>${RETURN_PERIODS.map(t=>{
-      const touched = S1.ptT_touched.has(t);
-      return `<td>${touched ? '<span class="flag" style="color:var(--amber);">Manual (Fig. 3.7)</span>' : '<span class="flag" style="color:var(--cyan);border-color:rgba(111,195,232,0.4);background:rgba(111,195,232,0.08);">Auto (Hershfield)</span>'}</td>`;
-    }).join('')}</tr>` : ''}
-  `;
-  [...tbl.querySelectorAll('input')].forEach(inp=>{
-    inp.addEventListener('input', e=>{
-      const t = +e.target.dataset.t;
-      S1.ptT_touched.add(t);
-      S1.ptT[t] = e.target.value==='' ? null : +e.target.value;
-      recalcM1();
+  withInputFocusPreserved(tbl, ()=>{
+    tbl.innerHTML = `
+      <tr><th class="rowlabel">Return period</th>${RETURN_PERIODS.map(t=>`<th>1:${t}</th>`).join('')}</tr>
+      <tr><td class="rowlabel">P<sub>t,T</sub> (mm)</td>${RETURN_PERIODS.map(t=>{
+        const touched = S1.ptT_touched.has(t);
+        return `<td><input type="text" inputmode="decimal" autocomplete="off" style="width:64px;text-align:center;background:${touched?'rgba(227,168,87,0.12)':'transparent'};border:1px solid ${touched?'var(--amber)':'var(--line)'};border-radius:5px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:4px;" data-t="${t}" value="${S1.ptT[t]===null?'':S1.ptT[t]}"></td>`;
+      }).join('')}</tr>
+      ${S1.autoFillPtT ? `<tr><td class="rowlabel" style="font-size:10.5px;">Source</td>${RETURN_PERIODS.map(t=>{
+        const touched = S1.ptT_touched.has(t);
+        return `<td>${touched ? '<span class="flag" style="color:var(--amber);">Manual (Fig. 3.7)</span>' : '<span class="flag" style="color:var(--cyan);border-color:var(--eq-border);background:var(--eq-bg);">Auto (Hershfield)</span>'}</td>`;
+      }).join('')}</tr>` : ''}
+    `;
+    [...tbl.querySelectorAll('input')].forEach(inp=>{
+      inp.addEventListener('input', e=>{
+        const t = +e.target.dataset.t;
+        e.target.value = e.target.value.replace(/[^0-9.]/g, ''); // free-text field now (see withInputFocusPreserved note) — keep it numeric-only
+        S1.ptT_touched.add(t);
+        S1.ptT[t] = e.target.value==='' ? null : +e.target.value;
+        recalcM1();
+      });
     });
   });
 
@@ -2478,12 +3109,82 @@ function printCompactEmp(){
   ], vals, null);
 }
 
+// SVG only — no charting library, since the desktop app runs offline and can't rely on
+// a CDN being reachable. Log-scaled x-axis (return period) matches standard flood-
+// frequency plotting convention; colors are a fixed categorical palette (not theme-
+// linked, since line identity needs to stay recognizable regardless of light/dark mode)
+// chosen to stay legible against both a white and a dark-navy background.
+const CHART_COLORS = ['#2E86C1','#16A085','#8E44AD','#D35400','#C0392B','#229954'];
+function summaryChart(methods){
+  const W = 700, H = 380, padL = 58, padR = 16, padT = 16, padB = 46;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+
+  const logT = RETURN_PERIODS.map(t=>Math.log(t));
+  const logMin = Math.min(...logT), logMax = Math.max(...logT);
+  const xFor = t => padL + ((Math.log(t)-logMin)/(logMax-logMin)) * plotW;
+
+  let maxQ = 0;
+  methods.forEach(m=> m.vals.forEach(v=>{ if(v!==null && v!==undefined && !isNaN(v) && v>maxQ) maxQ=v; }));
+  const hasData = maxQ > 0;
+  const yMax = hasData ? maxQ*1.12 : 10;
+  const yFor = v => padT + plotH - (v/yMax)*plotH;
+
+  const yTicks = 5;
+  const gridLines = Array.from({length:yTicks+1}, (_,i)=>{
+    const val = (yMax/yTicks)*i, y = yFor(val);
+    return `<line x1="${padL}" y1="${y}" x2="${padL+plotW}" y2="${y}" stroke="var(--line)" stroke-width="1"/>
+            <text x="${padL-8}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--muted)">${fmt(val,0)}</text>`;
+  }).join('');
+
+  const xTicks = RETURN_PERIODS.map(t=>{
+    const x = xFor(t);
+    return `<line x1="${x}" y1="${padT+plotH}" x2="${x}" y2="${padT+plotH+4}" stroke="var(--line)" stroke-width="1"/>
+            <text x="${x}" y="${padT+plotH+18}" text-anchor="middle" font-size="10" fill="var(--muted)">1:${t}</text>`;
+  }).join('');
+
+  const lines = methods.map((m,mi)=>{
+    const color = CHART_COLORS[mi % CHART_COLORS.length];
+    const segs = []; let cur = [];
+    RETURN_PERIODS.forEach((t,i)=>{
+      const v = m.vals[i];
+      if(v===null || v===undefined || isNaN(v)){ if(cur.length){ segs.push(cur); cur=[]; } }
+      else cur.push([xFor(t), yFor(v)]);
+    });
+    if(cur.length) segs.push(cur);
+    const pathD = segs.map(seg=>'M'+seg.map(p=>p.join(',')).join(' L')).join(' ');
+    const dots = RETURN_PERIODS.map((t,i)=>{
+      const v = m.vals[i];
+      if(v===null||v===undefined||isNaN(v)) return '';
+      return `<circle cx="${xFor(t)}" cy="${yFor(v)}" r="3" fill="${color}"/>`;
+    }).join('');
+    return pathD ? `<path d="${pathD}" fill="none" stroke="${color}" stroke-width="2"/>${dots}` : '';
+  }).join('');
+
+  const legend = methods.map((m,mi)=>`
+    <span style="display:inline-flex;align-items:center;gap:6px;margin-right:16px;margin-bottom:6px;font-size:11.5px;color:var(--text);">
+      <span style="width:12px;height:12px;border-radius:3px;background:${CHART_COLORS[mi % CHART_COLORS.length]};display:inline-block;flex:none;"></span>${m.label}
+    </span>`).join('');
+
+  return `<div style="margin:4px 0 20px;">
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;font-family:'IBM Plex Mono',monospace;" role="img" aria-label="Peak flow vs return period, all methods">
+      ${gridLines}${xTicks}
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="var(--line)" stroke-width="1"/>
+      <line x1="${padL}" y1="${padT+plotH}" x2="${padL+plotW}" y2="${padT+plotH}" stroke="var(--line)" stroke-width="1"/>
+      <text x="${padL+plotW/2}" y="${H-6}" text-anchor="middle" font-size="11" fill="var(--muted)">Return period (years, log scale)</text>
+      <text x="14" y="${padT+plotH/2}" text-anchor="middle" font-size="11" fill="var(--muted)" transform="rotate(-90 14 ${padT+plotH/2})">Peak flow, Q (m&#179;/s)</text>
+      ${hasData ? lines : `<text x="${padL+plotW/2}" y="${padT+plotH/2}" text-anchor="middle" font-size="12" fill="var(--muted)">Fill in method inputs to see the chart</text>`}
+    </svg>
+    <div style="margin-top:8px;">${legend}</div>
+  </div>`;
+}
+
 function renderSummary(){
   const panel = document.getElementById('panel');
 
   const methods = [
     {label:'Rational Method 1', fn:summaryM1},
     {label:'Rational Method 2', fn:summaryM2},
+    {label:'Rational Method (Alt. 3)', fn:summaryRA3},
     {label:'Standard Design Flood', fn:summarySDF},
     {label:'Unit Hydrograph', fn:summaryUH},
     {label:'Empirical (MIPI-71)', fn:summaryEmp},
@@ -2511,6 +3212,7 @@ function renderSummary(){
   panel.innerHTML = `<div class="step print-keep-step">
     <div class="step-head"><span class="step-num">Σ</span><span class="step-title">Summary — peak flow comparison across all methods</span></div>
     <p class="step-note">Recomputed fresh from each method's own tab — visit a tab and fill in its inputs (especially any manual point-rainfall or veld-zone selections) if a row here shows "—". Methods are independent, so differing catchment inputs per tab will naturally give different answers — this is a cross-check, not a reconciliation.</p>
+    ${summaryChart(results)}
     <table class="restab" id="summary_table" style="width:100%;">
       <tr><th class="rowlabel" style="text-align:left;">Method</th>${RETURN_PERIODS.map(t=>`<th>1:${t}</th>`).join('')}</tr>
       ${results.map(r=>`<tr><td class="rowlabel" style="text-align:left;">${r.label}</td>${r.vals.map(v=>`<td>${v===null||v===undefined||isNaN(v)?'—':fmt(v,2)}</td>`).join('')}</tr>`).join('')}
@@ -2523,7 +3225,399 @@ function renderSummary(){
   </div>`;
 }
 
+// ================= WATER & SEWER DEMAND (Red Book: CSIR Neighbourhood Planning and Design Guide) =================
+// Sections J (Water Supply) and K (Sanitation) — a different reference to the rest of FlowIQ, and a different
+// physical quantity (water/sewer flow, not stormwater peak flow), so this tab keeps its own independent state
+// rather than sharing area/Tc with the SANRAL-based tabs.
+
+// ---- Table J.2 / Table K.4: land use unit demands, sewer contribution ratio, and unit hydrograph type ----
+// unitBasis 'unit': kL is a [lo,hi] range per unit/stand/bed (Table J.2). unitBasis 'area': kL100 is kL per 100m² floor area (Table J.4/K.4, FAR-based).
+// uh: null means no sewer contribution figure is given for this land use (e.g. dry sanitation, open space).
+const WS_LANDUSE = [
+  {id:'res_hi',   label:'Residential — high density, small stands',        unitBasis:'unit', kL:[0.60,0.80], pctAADD:[70,80], uh:'UH5'},
+  {id:'res_med',  label:'Residential — medium density, medium stands',     unitBasis:'unit', kL:[0.80,1.00], pctAADD:[60,70], uh:'UH3'},
+  {id:'res_lo',   label:'Residential — low density, large stands',         unitBasis:'unit', kL:[1.00,1.30], pctAADD:[55,60], uh:'UH2'},
+  {id:'res_vlo',  label:'Residential — very low density, extra-large',     unitBasis:'unit', kL:[1.30,2.00], pctAADD:[40,55], uh:'UH1'},
+  {id:'li_hi',    label:'Low-income housing (waterborne) — high density',  unitBasis:'unit', kL:[0.30,0.40], pctAADD:[90,95], uh:'UH4'},
+  {id:'li_med',   label:'Low-income housing (waterborne) — medium density',unitBasis:'unit', kL:[0.40,0.50], pctAADD:[85,90], uh:'UH4'},
+  {id:'li_lo',    label:'Low-income housing (waterborne) — low density',   unitBasis:'unit', kL:[0.50,0.60], pctAADD:[80,85], uh:'UH4'},
+  {id:'lid_hi',   label:'Low-income housing (dry sanitation) — high density', unitBasis:'unit', kL:[0.25,0.30], pctAADD:null, uh:null},
+  {id:'lid_med',  label:'Low-income housing (dry sanitation) — medium density', unitBasis:'unit', kL:[0.30,0.35], pctAADD:null, uh:null},
+  {id:'lid_lo',   label:'Low-income housing (dry sanitation) — low density', unitBasis:'unit', kL:[0.35,0.40], pctAADD:null, uh:null},
+  {id:'grp_hi',   label:'Group/cluster housing — high density',            unitBasis:'unit', kL:[0.40,0.45], pctAADD:[90,95], uh:'UH5'},
+  {id:'grp_med',  label:'Group/cluster housing — medium density',          unitBasis:'unit', kL:[0.45,0.50], pctAADD:[85,90], uh:'UH5'},
+  {id:'grp_lo',   label:'Group/cluster housing — low density',             unitBasis:'unit', kL:[0.50,0.60], pctAADD:[80,85], uh:'UH5'},
+  {id:'flat_vhi', label:'Flats — very high density',                       unitBasis:'unit', kL:[0.25,0.30], pctAADD:[98,100],uh:'UH6'},
+  {id:'flat_hi',  label:'Flats — high density',                            unitBasis:'unit', kL:[0.30,0.35], pctAADD:[97,98], uh:'UH6'},
+  {id:'flat_med', label:'Flats — medium density',                          unitBasis:'unit', kL:[0.35,0.40], pctAADD:[96,97], uh:'UH6'},
+  {id:'flat_lo',  label:'Flats — low density',                             unitBasis:'unit', kL:[0.40,0.45], pctAADD:[95,96], uh:'UH6'},
+  {id:'agri_irr', label:'Agricultural holdings — incl. irrigation',        unitBasis:'unit', kL:[4.00,4.00], pctAADD:[40,40], uh:'UH1'},
+  {id:'agri_dom', label:'Agricultural holdings — domestic water only',     unitBasis:'unit', kL:[2.00,2.00], pctAADD:[80,80], uh:'UH1'},
+  {id:'golf',     label:'Golf estate (excl. golf course water)',           unitBasis:'unit', kL:[3.00,3.00], pctAADD:[40,40], uh:'UH2'},
+  {id:'retire',   label:'Retirement village',                              unitBasis:'unit', kL:[0.60,0.80], pctAADD:[70,80], uh:'UH5'},
+  {id:'biz',      label:'Business/commercial (per 100m² floor area)',      unitBasis:'area', kL:[0.65,0.65], pctAADD:[80,80], uh:'UH7'},
+  {id:'ind',      label:'Industrial (per 100m² floor area)',               unitBasis:'area', kL:[0.40,0.40], pctAADD:[80,80], uh:'UH10'},
+  {id:'govt',     label:'Government institutions (per 100m² floor area)',  unitBasis:'area', kL:[0.40,0.40], pctAADD:[80,80], uh:'UH9'},
+  {id:'ware',     label:'Warehousing (per 100m² floor area)',              unitBasis:'area', kL:[0.30,0.30], pctAADD:[80,80], uh:'UH11'},
+  {id:'inst',     label:'Institutional (per 100m² floor area)',            unitBasis:'area', kL:[0.60,0.60], pctAADD:[80,80], uh:'UH9'},
+  {id:'muni',     label:'Municipal services (per 100m² floor area)',       unitBasis:'area', kL:[0.60,0.60], pctAADD:[80,80], uh:'UH9'},
+  {id:'edu',      label:'Educational (per 100m² floor area)',              unitBasis:'area', kL:[0.60,0.60], pctAADD:[65,65], uh:'UH8'},
+];
+// Table K.8 default peak factors for the Peak-factor sewer method (ranges given; residential's true figure
+// comes from a graph — Figure K.21 — not a table, so this default is a starting point, not a digitised curve).
+const WS_PEAKFACTOR_DEFAULT = {UH1:2.5,UH2:2.5,UH3:2.5,UH4:2.5,UH5:2.5,UH6:2.5,UH7:1.4,UH8:2.0,UH9:2.0,UH10:3.0,UH11:2.0};
+
+// ---- Table K.5: 11 unit hydrographs (24 dimensionless hourly ordinates + peak/leak per unit, L/min/unit) ----
+const UH_ORD = [
+  [0.15, 0.17, 0.15, 0.09, 0.15, 0.15, 0.08, 0.08, 0.08, 0.09, 0.08],
+  [0.08, 0.10, 0.09, 0.05, 0.09, 0.09, 0.07, 0.07, 0.07, 0.07, 0.07],
+  [0.06, 0.05, 0.07, 0.06, 0.07, 0.07, 0.06, 0.06, 0.06, 0.06, 0.06],
+  [0.05, 0.05, 0.05, 0.19, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
+  [0.05, 0.05, 0.15, 0.49, 0.15, 0.15, 0.06, 0.06, 0.06, 0.06, 0.06],
+  [0.11, 0.44, 0.77, 0.80, 0.77, 0.77, 0.08, 0.08, 0.08, 0.10, 0.08],
+  [0.67, 1.00, 1.00, 0.83, 1.00, 1.00, 0.15, 0.15, 0.15, 0.47, 0.15],
+  [1.00, 0.91, 0.98, 0.93, 0.98, 0.98, 0.34, 0.34, 0.34, 0.68, 0.34],
+  [0.87, 0.94, 0.73, 1.00, 0.73, 0.73, 0.83, 0.83, 0.83, 0.84, 0.83],
+  [0.85, 0.84, 0.66, 0.96, 0.66, 0.66, 0.94, 0.94, 0.94, 0.93, 0.94],
+  [0.82, 0.74, 0.72, 0.89, 0.72, 0.72, 1.00, 1.00, 1.00, 0.94, 1.00],
+  [0.71, 0.59, 0.65, 0.75, 0.65, 0.65, 0.98, 0.98, 0.98, 0.89, 0.98],
+  [0.56, 0.48, 0.61, 0.71, 0.61, 0.61, 0.94, 0.94, 0.94, 0.75, 0.94],
+  [0.50, 0.41, 0.57, 0.74, 0.57, 0.57, 0.89, 0.89, 0.89, 0.81, 0.89],
+  [0.46, 0.40, 0.63, 0.76, 0.63, 0.63, 0.88, 0.88, 0.88, 0.95, 0.88],
+  [0.44, 0.38, 0.66, 0.73, 0.66, 0.66, 0.92, 0.92, 0.92, 1.00, 0.92],
+  [0.41, 0.39, 0.70, 0.70, 0.70, 0.70, 0.84, 0.84, 0.84, 0.89, 0.84],
+  [0.38, 0.48, 0.68, 0.66, 0.68, 0.68, 0.35, 0.35, 0.35, 0.66, 0.35],
+  [0.45, 0.53, 0.72, 0.59, 0.72, 0.72, 0.22, 0.22, 0.22, 0.35, 0.22],
+  [0.49, 0.52, 0.70, 0.51, 0.70, 0.70, 0.15, 0.15, 0.15, 0.22, 0.15],
+  [0.45, 0.51, 0.68, 0.38, 0.68, 0.68, 0.12, 0.12, 0.12, 0.17, 0.12],
+  [0.50, 0.49, 0.57, 0.26, 0.57, 0.57, 0.11, 0.11, 0.11, 0.14, 0.11],
+  [0.40, 0.42, 0.44, 0.18, 0.44, 0.44, 0.10, 0.10, 0.10, 0.12, 0.10],
+  [0.29, 0.28, 0.22, 0.13, 0.22, 0.22, 0.09, 0.09, 0.09, 0.10, 0.09],
+];
+const UH_NAMES = ['UH1','UH2','UH3','UH4','UH5','UH6','UH7','UH8','UH9','UH10','UH11'];
+const UH_PEAK = {UH1:1.69, UH2:1.04, UH3:0.64, UH4:0.21, UH5:0.37, UH6:0.24, UH7:2.46, UH8:4.97, UH9:1.93, UH10:2.19, UH11:1.75};
+const UH_LEAK = {UH1:0.26, UH2:0.21, UH3:0.19, UH4:0.15, UH5:0.14, UH6:0.21, UH7:1.05, UH8:2.12, UH9:0.83, UH10:1.04, UH11:0.75};
+function uhOrdinates(uh){ const i = UH_NAMES.indexOf(uh); return UH_ORD.map(row=>row[i]); }
+
+// ---- Table J.9: peak week/day/hour factors by predominant land-use bucket and TAADD band (kL/d) ----
+const TABLE_J9 = {
+  LIH: [[1000,1.50,1.90,3.60],[5000,1.40,1.80,3.40],[10000,1.35,1.70,3.30],[15000,1.30,1.50,3.20],[20000,1.25,1.40,3.10],[Infinity,1.25,1.40,3.00]],
+  RES: [[1000,1.80,2.20,4.60],[5000,1.65,2.00,4.00],[10000,1.50,1.80,3.60],[15000,1.40,1.60,3.50],[20000,1.35,1.50,3.30],[Infinity,1.30,1.50,3.00]],
+  BCI: [[5000,1.45,1.70,3.30],[10000,1.30,1.60,3.15],[Infinity,1.25,1.50,3.00]],
+};
+function j9PeakFactors(bucket, taadd){
+  const rows = TABLE_J9[bucket] || TABLE_J9.RES;
+  for(const [ceil,pw,pd,ph] of rows){ if(taadd <= ceil) return {pw,pd,ph}; }
+  const last = rows[rows.length-1]; return {pw:last[1],pd:last[2],ph:last[3]};
+}
+function wsBucketFor(catId){
+  if(catId.startsWith('li_') || catId.startsWith('lid_')) return 'LIH';
+  if(['biz','ind','govt','ware','inst','muni','edu'].includes(catId)) return 'BCI';
+  return 'RES';
+}
+
+// ---- Sewer flow core (Section K.4.2.1) — Unit Hydrograph and AADD methods share this exact formula; the
+// manual's own worked examples (S1 vs S2) show they resolve to identical numbers once the unit flow (UQ) is
+// fixed, so both are implemented as one calculation path here, verified against both worked examples. ----
+function sewerHydrographFlow(uh, EE, UQ, peakDayFactor){
+  const ord = uhOrdinates(uh), peak = UH_PEAK[uh], leak = UH_LEAK[uh];
+  const HQ = ord.map(u => u*peak + leak);
+  const avgHQ = HQ.reduce((a,b)=>a+b,0)/24;
+  const shapePDDWF = avgHQ * 24 * 60 / 1000;
+  const scale = shapePDDWF>0 ? UQ/shapePDDWF : 0;
+  const TQ = HQ.map(hq => hq * scale * EE / 60);
+  return { TQ, IPDWF: Math.max(...TQ), PDDWF: EE*UQ, ADDWF: (EE*UQ)/peakDayFactor };
+}
+function sewerPeakFactorMethod(EE, UQ, PF, peakDayFactor){
+  const PDDWF = EE*UQ;
+  return { IPDWF: EE*UQ*PF*1000/86400, PDDWF, ADDWF: PDDWF/peakDayFactor };
+}
+function infiltrationFlow(rateLminmM, pipeLengthM, pipeDiaM){
+  if(!pipeLengthM || !pipeDiaM || isNaN(pipeLengthM) || isNaN(pipeDiaM)) return 0;
+  return rateLminmM * pipeLengthM * pipeDiaM / 60;
+}
+function designFlow(ipdwfInclInfil, stormwaterIngressFraction){
+  return ipdwfInclInfil / (1 - stormwaterIngressFraction);
+}
+
+// ---- State: a list of land-use entries shared by both the water demand and sewer flow calculations ----
+const WS = {
+  entries: [],
+  nextId: 1,
+  sewerMethod: 'uh', // 'uh' | 'aadd' | 'peak' — see note above: uh and aadd share one calc path
+  peakDayFactor: 1.1,
+  realLossPct: 20, // Method 1 (percentage estimate), eq. J.6 — manual recommends 15-25%
+  infilPipeLength: NaN,
+  infilPipeDiaMM: 150,
+  infilRate: 0.04, // L/min/m pipe/m Ø — manual recommends 0.03-0.04
+  stormwaterIngressPct: 30,
+};
+function wsAddEntry(){
+  WS.entries.push({ id:'wse'+(WS.nextId++), name:'', cat:'res_med', count:NaN, aaddOverride:NaN, pctOverride:NaN, pfOverride:NaN });
+}
+function wsRemoveEntry(id){ WS.entries = WS.entries.filter(e=>e.id!==id); }
+function wsCatOf(entry){ return WS_LANDUSE.find(c=>c.id===entry.cat) || WS_LANDUSE[0]; }
+function wsEntryLabel(entry){ return (entry.name && entry.name.trim()) ? entry.name.trim() : wsCatOf(entry).label; }
+function wsAaddUsed(entry){ const cat=wsCatOf(entry); return (entry.aaddOverride!==undefined && !isNaN(entry.aaddOverride)) ? entry.aaddOverride : (cat.kL[0]+cat.kL[1])/2; }
+function wsPctUsed(entry){ const cat=wsCatOf(entry); if(cat.pctAADD===null) return null; return (entry.pctOverride!==undefined && !isNaN(entry.pctOverride)) ? entry.pctOverride : (cat.pctAADD[0]+cat.pctAADD[1])/2; }
+function wsEE(entry){ const cat=wsCatOf(entry); return cat.unitBasis==='area' ? (+entry.count||0)/100 : (+entry.count||0); }
+function wsEntryAADD(entry){ return wsEE(entry) * wsAaddUsed(entry); } // kL/d
+function wsEntryUQ(entry){ const pct=wsPctUsed(entry); return pct===null ? null : wsAaddUsed(entry)*pct/100; } // kL/d/unit (sewer)
+
+function wsStepEntries(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">1</span><span class="step-title">Development — land use mix</span></div>
+    <p class="step-note">One list feeds both the water demand and sewer flow calculations below, since the Red Book sources both from the same land-use tables (J.2 and K.4). Unit demand figures are given as ranges — each defaults to the midpoint, editable per row. Rows without a sewer figure (dry-sanitation stands, open space) count toward water demand only.</p>
+    <div id="ws_entries"></div>
+    <button id="ws_add_entry" type="button" class="tab" style="border:1px solid var(--line);border-radius:8px;padding:7px 16px;flex:none;cursor:pointer;margin-top:8px;">+ Add land use</button>
+  </div>`;
+}
+function wsEntryRowHTML(e){
+  const cat = wsCatOf(e);
+  const unitLabel = cat.unitBasis==='area' ? 'Floor area, m²' : 'Number of units/stands';
+  const aadd = wsAaddUsed(e), pct = wsPctUsed(e);
+  return `<div class="charblock" style="margin-bottom:10px;" data-row="${e.id}">
+    <div class="field" style="margin-bottom:6px;"><label>Description <span class="unit">e.g. guardhouse, main hall, block 2</span></label>
+      <input type="text" class="ws-name" data-id="${e.id}" value="${(e.name||'').replace(/"/g,'&quot;')}" placeholder="${cat.label} (defaults to this if left blank)">
+    </div>
+    <div class="grid grid-3" style="align-items:end;">
+      <div class="field" style="grid-column:span 1;"><label>Land use</label>
+        <select class="ws-cat" data-id="${e.id}">${WS_LANDUSE.map(c=>`<option value="${c.id}" ${c.id===e.cat?'selected':''}>${c.label}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>${unitLabel}</label><input type="number" step="1" class="ws-count" data-id="${e.id}" value="${iv(e.count)}"></div>
+      <div class="field"><label>Unit demand override <span class="unit">kL/${cat.unitBasis==='area'?'100m²':'unit'}/d</span></label><input type="number" step="0.01" class="ws-aadd" data-id="${e.id}" value="${e.aaddOverride!==undefined&&!isNaN(e.aaddOverride)?e.aaddOverride:''}" placeholder="auto (${fmt(aadd,2)})"></div>
+    </div>
+    <div class="grid grid-3" style="margin-top:6px;align-items:end;">
+      <div class="field"><label>Sewer contribution override <span class="unit">% AADD</span></label>
+        <input type="number" step="1" class="ws-pct" data-id="${e.id}" value="${e.pctOverride!==undefined&&!isNaN(e.pctOverride)?e.pctOverride:''}" placeholder="${pct===null?'n/a':'auto ('+fmt(pct,0)+'%)'}" ${pct===null?'disabled':''}>
+      </div>
+      <div class="field"><label>Unit hydrograph</label><input type="text" value="${cat.uh||'— (water only)'}" disabled style="opacity:0.7;"></div>
+      <div class="field" id="ws_pf_wrap_${e.id}"><label>Peak factor override</label>
+        <input type="number" step="0.1" class="ws-pf" data-id="${e.id}" value="${e.pfOverride!==undefined&&!isNaN(e.pfOverride)?e.pfOverride:''}" placeholder="auto (${cat.uh?fmt(WS_PEAKFACTOR_DEFAULT[cat.uh],1):'—'})" ${cat.uh?'':'disabled'}>
+      </div>
+    </div>
+    <button type="button" class="ws-remove" data-id="${e.id}" style="margin-top:6px;background:none;border:none;color:var(--bad);cursor:pointer;font-size:11px;font-family:'IBM Plex Mono',monospace;padding:0;">Remove this land use</button>
+  </div>`;
+}
+function wireWSEntries(){
+  const el = document.getElementById('ws_entries');
+  if(WS.entries.length===0) wsAddEntry();
+  el.innerHTML = WS.entries.map(wsEntryRowHTML).join('');
+  el.querySelectorAll('.ws-name').forEach(inp=>inp.addEventListener('input', e=>{
+    const entry = WS.entries.find(x=>x.id===e.target.dataset.id); entry.name = e.target.value; recalcWS();
+  }));
+  el.querySelectorAll('.ws-cat').forEach(sel=>sel.addEventListener('input', e=>{
+    const entry = WS.entries.find(x=>x.id===e.target.dataset.id); entry.cat = e.target.value; renderWaterSewer();
+  }));
+  el.querySelectorAll('.ws-count').forEach(inp=>inp.addEventListener('input', e=>{
+    const entry = WS.entries.find(x=>x.id===e.target.dataset.id); entry.count = numOrNaN(e.target.value); recalcWS();
+  }));
+  el.querySelectorAll('.ws-aadd').forEach(inp=>inp.addEventListener('input', e=>{
+    const entry = WS.entries.find(x=>x.id===e.target.dataset.id); entry.aaddOverride = numOrNaN(e.target.value); recalcWS();
+  }));
+  el.querySelectorAll('.ws-pct').forEach(inp=>inp.addEventListener('input', e=>{
+    const entry = WS.entries.find(x=>x.id===e.target.dataset.id); entry.pctOverride = numOrNaN(e.target.value); recalcWS();
+  }));
+  el.querySelectorAll('.ws-pf').forEach(inp=>inp.addEventListener('input', e=>{
+    const entry = WS.entries.find(x=>x.id===e.target.dataset.id); entry.pfOverride = numOrNaN(e.target.value); recalcWS();
+  }));
+  el.querySelectorAll('.ws-remove').forEach(btn=>btn.addEventListener('click', e=>{
+    wsRemoveEntry(e.target.dataset.id); renderWaterSewer();
+  }));
+  document.getElementById('ws_add_entry').addEventListener('click', ()=>{ wsAddEntry(); renderWaterSewer(); });
+}
+
+function wsStepWaterResults(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">2</span><span class="step-title">Water demand (Section J.4.1)</span></div>
+    <div class="eq">AADD = Σ (units × unit demand) &nbsp;·&nbsp; TAADD = AADD ÷ (1 − real losses) &nbsp;·&nbsp; Peak = TAADD × peak factor (Table J.9)</div>
+    <div class="grid grid-2">
+      <div class="field"><label>Estimated real losses <span class="unit">%</span></label><input type="number" step="1" id="ws_realloss" value="${WS.realLossPct}"></div>
+    </div>
+    <div class="outbox" id="ws_water_out" style="margin-top:8px;"></div>
+    <table class="dtab" id="ws_water_table" style="width:100%;margin-top:8px;"></table>
+    <div class="result-hero" style="margin-top:14px;">
+      <span class="tag">Design flow — peak water demand</span>
+      <div class="big" id="ws_water_design_flow">—<span class="u">L/s</span></div>
+    </div>
+  </div>`;
+}
+function wsStepSewerResults(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">3</span><span class="step-title">Sewer flow (Section K.4.2)</span></div>
+    <div class="toggle" id="ws_method_toggle" style="margin-bottom:12px;">
+      <button data-m="uh" class="${WS.sewerMethod==='uh'?'active':''}">Unit Hydrograph</button>
+      <button data-m="aadd" class="${WS.sewerMethod==='aadd'?'active':''}">AADD method</button>
+      <button data-m="peak" class="${WS.sewerMethod==='peak'?'active':''}">Peak factor method</button>
+    </div>
+    <div class="grid grid-3">
+      <div class="field"><label>Peak day factor</label><input type="number" step="0.05" id="ws_peakday" value="${WS.peakDayFactor}"></div>
+      <div class="field"><label>Sewer pipe length <span class="unit">m</span></label><input type="number" step="1" id="ws_pipelen" value="${iv(WS.infilPipeLength)}" placeholder="Table K.11"></div>
+      <div class="field"><label>Sewer pipe diameter <span class="unit">mm</span></label><input type="number" step="1" id="ws_pipedia" value="${WS.infilPipeDiaMM}"></div>
+    </div>
+    <div class="grid grid-2" style="margin-top:2px;">
+      <div class="field"><label>Groundwater infiltration rate <span class="unit">L/min/m pipe/m Ø</span></label><input type="number" step="0.005" id="ws_infilrate" value="${WS.infilRate}"></div>
+      <div class="field"><label>Stormwater ingress spare capacity <span class="unit">%</span></label><input type="number" step="1" id="ws_stormpct" value="${WS.stormwaterIngressPct}"></div>
+    </div>
+    <div class="outbox" id="ws_sewer_out" style="margin-top:8px;"></div>
+    <table class="dtab" id="ws_sewer_table" style="width:100%;margin-top:8px;"></table>
+    <div class="result-hero" style="margin-top:14px;">
+      <span class="tag">Design flow (IPWWF)</span>
+      <div class="big" id="ws_design_flow">—<span class="u">L/s</span></div>
+    </div>
+  </div>`;
+}
+function wsStepSummary(){
+  return `<div class="step">
+    <div class="step-head"><span class="step-num">4</span><span class="step-title">Summary — demand per day &amp; instantaneous flow</span></div>
+    <p class="step-note">One row per land use, pulling together both calculations above: water demand and its Table J.9 peak-hour factor, and sewer demand and its own peak flow, alongside each other. The peak flow factor shown for sewer only applies to the Peak-factor method — the Unit Hydrograph and AADD methods spread flow across a 24-hour shape instead of a single multiplier, so that column reads "—" for those.</p>
+    <table class="dtab" id="ws_summary_table" style="width:100%;"></table>
+    ${printBtn('Print / Save as PDF — Water & Sewer Demand')}
+  </div>`;
+}
+
+function renderWaterSewer(){
+  const panel = document.getElementById('panel');
+  panel.innerHTML = `
+    ${wsStepEntries()}
+    ${wsStepWaterResults()}
+    ${wsStepSewerResults()}
+    ${wsStepSummary()}
+  `;
+  wireWSEntries();
+  document.getElementById('ws_realloss').addEventListener('input', e=>{ WS.realLossPct=+e.target.value; recalcWS(); });
+  document.getElementById('ws_peakday').addEventListener('input', e=>{ WS.peakDayFactor=+e.target.value; recalcWS(); });
+  document.getElementById('ws_pipelen').addEventListener('input', e=>{ WS.infilPipeLength=numOrNaN(e.target.value); recalcWS(); });
+  document.getElementById('ws_pipedia').addEventListener('input', e=>{ WS.infilPipeDiaMM=+e.target.value; recalcWS(); });
+  document.getElementById('ws_infilrate').addEventListener('input', e=>{ WS.infilRate=+e.target.value; recalcWS(); });
+  document.getElementById('ws_stormpct').addEventListener('input', e=>{ WS.stormwaterIngressPct=+e.target.value; recalcWS(); });
+  [...document.getElementById('ws_method_toggle').children].forEach(btn=>{
+    btn.onclick = ()=>{ WS.sewerMethod = btn.dataset.m; renderWaterSewer(); };
+  });
+  recalcWS();
+}
+
+function recalcWS(){
+  // ---- Water demand ----
+  const rows = WS.entries.map(e=>({e, cat:wsCatOf(e), EE:wsEE(e), aadd:wsAaddUsed(e), entryAADD:wsEntryAADD(e), uq:wsEntryUQ(e)}));
+  const totalAADD = rows.reduce((s,r)=>s+r.entryAADD,0);
+  const lossFactor = WS.realLossPct<100 ? 1-WS.realLossPct/100 : 1;
+  const TAADD = lossFactor>0 ? totalAADD/lossFactor : totalAADD;
+
+  // Peak demand is computed per land-use bucket (each has its own peak factor from Table J.9, banded by
+  // that bucket's own TAADD) then summed — matching the manual's own worked example (BCI+RES zone), not a
+  // single "predominant bucket" factor applied to the combined total.
+  const bucketTotals = {LIH:0,RES:0,BCI:0};
+  rows.forEach(r=>{ bucketTotals[wsBucketFor(r.cat.id)] += r.entryAADD; });
+  const bucketLabels = {LIH:'Low-income housing', RES:'Residential', BCI:'Business/commercial/industrial'};
+  const bucketRows = Object.keys(bucketTotals).filter(b=>bucketTotals[b]>0).map(b=>{
+    const taaddB = bucketTotals[b]/lossFactor;
+    const pf = j9PeakFactors(b, taaddB);
+    return {bucket:b, label:bucketLabels[b], taadd:taaddB, ...pf, week:taaddB*pf.pw, day:taaddB*pf.pd, hourLs:taaddB*pf.ph*1000/86400};
+  });
+  const peakWeek = bucketRows.reduce((s,r)=>s+r.week,0);
+  const peakDay = bucketRows.reduce((s,r)=>s+r.day,0);
+  const peakHourLs = bucketRows.reduce((s,r)=>s+r.hourLs,0);
+  const bucketByKey = {}; bucketRows.forEach(r=>{ bucketByKey[r.bucket]=r; });
+
+  // Same peak-hour factor as the bucket it belongs to, applied to this entry's own share of TAADD —
+  // entries in the same bucket sum back to exactly that bucket's total peak flow above.
+  const waterPerEntry = rows.map(r=>{
+    const bkt = bucketByKey[wsBucketFor(r.cat.id)];
+    const entryTAADD = lossFactor>0 ? r.entryAADD/lossFactor : r.entryAADD;
+    const ph = bkt ? bkt.ph : null;
+    const peakLs = (bkt && entryTAADD>0) ? entryTAADD*bkt.ph*1000/86400 : (r.entryAADD>0 ? 0 : null);
+    const countUnit = r.cat.unitBasis==='area' ? 'm²' : (r.e.count===1 ? 'unit' : 'units');
+    return { id:r.e.id, label:wsEntryLabel(r.e), demand:r.entryAADD, ph, peakLs, count:r.e.count, countUnit };
+  });
+
+  document.getElementById('ws_water_out').innerHTML = totalAADD>0
+    ? `<span class="lbl">AADD</span>${fmt(totalAADD,2)} kL/d &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">TAADD</span> ${fmt(TAADD,2)} kL/d`
+    : `Add at least one land use above.`;
+  const wtbl = document.getElementById('ws_water_table');
+  wtbl.innerHTML = bucketRows.length ? `
+    <tr><th class="rowlabel" style="text-align:left;">Land-use band</th><th>PFweek</th><th>PFday</th><th>PFhour</th><th>Peak week</th><th>Peak day</th><th>Peak hour</th></tr>
+    ${bucketRows.map(r=>`<tr><td class="rowlabel" style="text-align:left;">${r.label}</td><td>${fmt(r.pw,2)}</td><td>${fmt(r.pd,2)}</td><td>${fmt(r.ph,2)}</td><td>${fmt(r.week,1)} kL/d</td><td>${fmt(r.day,1)} kL/d</td><td>${fmt(r.hourLs,2)} L/s</td></tr>`).join('')}
+    <tr class="hi"><td class="rowlabel" style="text-align:left;" colspan="4">Total peak demand</td><td>${fmt(peakWeek,1)} kL/d</td><td>${fmt(peakDay,1)} kL/d</td><td>${fmt(peakHourLs,2)} L/s</td></tr>
+  ` : '';
+  document.getElementById('ws_water_design_flow').innerHTML = totalAADD>0
+    ? `${fmt(peakHourLs,3)}<span class="u">L/s</span>`
+    : `—<span class="u">L/s</span>`;
+
+  // ---- Sewer flow ----
+  const sewerRows = rows.filter(r=>r.uq!==null && r.EE>0);
+  let combinedIPDWF = 0, totalPDDWF = 0, totalADDWF = 0, hourlySums = null;
+  const perEntryResults = sewerRows.map(r=>{
+    const uh = r.cat.uh;
+    if(WS.sewerMethod==='peak'){
+      const pf = (r.e.pfOverride!==undefined && !isNaN(r.e.pfOverride)) ? r.e.pfOverride : WS_PEAKFACTOR_DEFAULT[uh];
+      const res = sewerPeakFactorMethod(r.EE, r.uq, pf, WS.peakDayFactor);
+      return {id:r.e.id, label:wsEntryLabel(r.e), pf, IPDWF:res.IPDWF, PDDWF:res.PDDWF, ADDWF:res.ADDWF};
+    } else {
+      const res = sewerHydrographFlow(uh, r.EE, r.uq, WS.peakDayFactor);
+      if(!hourlySums) hourlySums = res.TQ.slice();
+      else hourlySums = hourlySums.map((v,i)=>v+res.TQ[i]);
+      return {id:r.e.id, label:wsEntryLabel(r.e), pf:null, IPDWF:res.IPDWF, PDDWF:res.PDDWF, ADDWF:res.ADDWF};
+    }
+  });
+  totalPDDWF = perEntryResults.reduce((s,r)=>s+r.PDDWF,0);
+  totalADDWF = perEntryResults.reduce((s,r)=>s+r.ADDWF,0);
+  combinedIPDWF = (WS.sewerMethod==='peak')
+    ? perEntryResults.reduce((s,r)=>s+r.IPDWF,0)
+    : (hourlySums ? Math.max(...hourlySums) : 0);
+
+  const infil = infiltrationFlow(WS.infilRate, WS.infilPipeLength, WS.infilPipeDiaMM/1000);
+  const ipdwfInclInfil = combinedIPDWF + infil;
+  const df = designFlow(ipdwfInclInfil, WS.stormwaterIngressPct/100);
+
+  document.getElementById('ws_sewer_out').innerHTML = sewerRows.length>0
+    ? `<span class="lbl">Method</span>${WS.sewerMethod==='peak'?'Peak factor':(WS.sewerMethod==='aadd'?'AADD':'Unit Hydrograph')} &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">IPDWF excl. infiltration</span> ${fmt(combinedIPDWF,3)} L/s &nbsp;&nbsp;|&nbsp;&nbsp; <span class="lbl" style="display:inline;">Infiltration</span> ${fmt(infil,3)} L/s`
+    : `No land use with a sewer contribution figure yet (dry-sanitation and open-space entries are water-only).`;
+  const stbl = document.getElementById('ws_sewer_table');
+  stbl.innerHTML = perEntryResults.length ? `
+    <tr><th class="rowlabel" style="text-align:left;">Land use</th><th>IPDWF (L/s)</th><th>PDDWF (kL/d)</th><th>ADDWF (kL/d)</th></tr>
+    ${perEntryResults.map(r=>`<tr><td class="rowlabel" style="text-align:left;">${r.label}</td><td>${fmt(r.IPDWF,3)}</td><td>${fmt(r.PDDWF,1)}</td><td>${fmt(r.ADDWF,1)}</td></tr>`).join('')}
+    <tr class="hi"><td class="rowlabel" style="text-align:left;">Total</td><td>${fmt(combinedIPDWF,3)}</td><td>${fmt(totalPDDWF,1)}</td><td>${fmt(totalADDWF,1)}</td></tr>
+  ` : '';
+
+  document.getElementById('ws_design_flow').innerHTML = sewerRows.length>0
+    ? `${fmt(df,3)}<span class="u">L/s</span>`
+    : `—<span class="u">L/s</span>`;
+
+  // ---- Combined summary: one row per land use, water and sewer side by side ----
+  const sewerById = {}; perEntryResults.forEach(r=>{ sewerById[r.id]=r; });
+  const summaryRows = waterPerEntry.map(w=>({ w, s: sewerById[w.id] || null }));
+  const sumtbl = document.getElementById('ws_summary_table');
+  sumtbl.innerHTML = summaryRows.length ? `
+    <tr>
+      <th class="rowlabel" style="text-align:left;">Land use</th>
+      <th>Area / units</th>
+      <th colspan="3">Water</th>
+      <th colspan="3">Sewer</th>
+    </tr>
+    <tr>
+      <th class="rowlabel" style="text-align:left;"></th>
+      <th></th>
+      <th>Demand (kL/d)</th><th>Peak factor</th><th>Instant. flow (L/s)</th>
+      <th>Demand (kL/d)</th><th>Peak factor</th><th>Instant. flow (L/s)</th>
+    </tr>
+    ${summaryRows.map(({w,s})=>`<tr>
+      <td class="rowlabel" style="text-align:left;">${w.label}</td>
+      <td>${iv(w.count)===''?'—':fmt(w.count,0)+' '+w.countUnit}</td>
+      <td>${fmt(w.demand,2)}</td><td>${w.ph===null?'—':fmt(w.ph,2)}</td><td>${w.peakLs===null?'—':fmt(w.peakLs,3)}</td>
+      <td>${s?fmt(s.PDDWF,2):'—'}</td><td>${s&&s.pf!==null?fmt(s.pf,1):(s?'(hydrograph)':'—')}</td><td>${s?fmt(s.IPDWF,3):'—'}</td>
+    </tr>`).join('')}
+    <tr class="hi">
+      <td class="rowlabel" style="text-align:left;">Total</td>
+      <td></td>
+      <td>${fmt(totalAADD,2)}</td><td>—</td><td>${fmt(peakHourLs,3)}</td>
+      <td>${fmt(totalPDDWF,2)}</td><td>—</td><td>${fmt(combinedIPDWF,3)}</td>
+    </tr>
+  ` : '';
+}
+
 // ================= MASTER RECALC =================
+
 
 function recalcAll(){
   const areaCaveatEl = document.getElementById('area_caveat');
@@ -2604,6 +3698,30 @@ function recalcAll(){
     ? `${fmt(headline.QT,2)}<span class="u">m³/s at 1:${S.T_design}</span>`
     : `—<span class="u">m³/s</span>`;
 }
+
+// ---- Light/dark mode toggle. The theme itself (which CSS variables win) is set by the
+// tiny inline script at the very top of <head> so there's no flash of the wrong colors —
+// this just keeps the toggle button's label/icon in sync and handles the click. ----
+function applyThemeButtonLabel(){
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const icon = document.getElementById('theme-toggle-icon');
+  const label = document.getElementById('theme-toggle-label');
+  if(icon) icon.textContent = dark ? '☀' : '☾';
+  if(label) label.textContent = dark ? 'Light mode' : 'Dark mode';
+}
+function toggleTheme(){
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if(dark){
+    document.documentElement.removeAttribute('data-theme');
+    try{ localStorage.setItem('flowiq-theme','light'); }catch(e){}
+  } else {
+    document.documentElement.setAttribute('data-theme','dark');
+    try{ localStorage.setItem('flowiq-theme','dark'); }catch(e){}
+  }
+  applyThemeButtonLabel();
+}
+function switchSection(){ S.section = null; render(); }
+applyThemeButtonLabel();
 
 document.addEventListener('DOMContentLoaded', render);
 if(document.readyState !== 'loading') render();
